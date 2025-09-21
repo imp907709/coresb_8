@@ -17,6 +17,7 @@ builder.RegisterServicesBL();
 
 var app = builder.Build();
 
+app.UseStaticFiles();
 app.Registration();
 
 // Access the logger from the application services
