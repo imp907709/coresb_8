@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Interviews;
 using LINQtoObjectsCheck;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -146,6 +147,26 @@ namespace CoreSBServer.Controllers
             var selectedQr = items.Where(s=>filter.Contains(s));
             var selectedItms = selectedQr.ToList();
             return selectedItms;
+        }
+
+
+
+        public static async Task AsyncA()
+        {
+            Console.WriteLine("Enter A");
+            await Task.Delay(2000);
+            Console.WriteLine("Exit A");
+        }
+        public static async Task AsyncB()
+        {
+            Console.WriteLine("Enter B");
+            await Task.Delay(2000);
+            Console.WriteLine("Exit B");
+        }
+
+        public static async Task AsyncTest()
+        {
+            await AsyncA();
         }
     }
 }

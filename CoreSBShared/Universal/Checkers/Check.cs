@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreSBServer.Controllers.Check.multithreading;
 using InfrastructureCheckers;
 using UtilsCustom;
 
@@ -2779,9 +2780,20 @@ namespace Interviews
             methodA();
         }
 
+        public static async Task GOAsync()
+        {
+            await InterviewA.MethodB();
+        }
+
         public void methodA()
         {
             StringCompare.SideBySideComparison();
+        }
+
+        public static async Task MethodB()
+        {
+            var tEx = new ThreadingExample();
+            await tEx.GO();
         }
     }
 

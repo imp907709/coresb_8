@@ -1,6 +1,7 @@
 using CoreSBBL;
 using CoreSBShared.Registrations;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -17,7 +18,7 @@ builder.RegisterServicesBL();
 
 var app = builder.Build();
 
-app.UseStaticFiles();
+// app.UseStaticFiles();
 app.Registration();
 
 // Access the logger from the application services
