@@ -141,18 +141,68 @@ namespace CoreSBServer.Controllers.Check.multithreading
             }
         }
 
-        public async Task<T> AsyncThreadSafe<T>(Func<Task,T> work, SemaphoreSlim smf)
+
+
+        public async Task<string> GetHttp()
         {
-            await smf.WaitAsync();
+            var sw = new Stopwatch();
+            sw.Start();
+            
+            var urls = new List<string>()
+            {
+                "https://api.restful-api.dev/objects", 
+                "https://api.restful-api.dev/objects",
+                "https://api.restful-api.dev/objects",
+                "https://api.restful-api.dev/objects",
+                "https://api.restful-api.dev/objects"
+            };
+            var max = 4;
+            var res = await GetHttpInParallel(urls, max);
+
+            sw.Stop();
+
+            return $"Result: {res?.Count()}; Len:{res.Sum(s=>s.Length)} in {sw.Elapsed}";
+        }
+        public async Task<string[]> GetHttpInParallel(IEnumerable<string> urls, int maxParallel)
+        {
+            var dict = new ConcurrentDictionary<string, string>();
+            var smf = new SemaphoreSlim(maxParallel);
+            using var client = new HttpClient();
+            using var source = new CancellationTokenSource();
+            var ct = source.Token;
+
+            try
+            {
+                var orders = urls.Select(s => AsyncThreadSafe(HttpGet, client, s, smf, ct));
+
+                var result = await Task.WhenAll(orders);
+                return result;
+            } catch {
+                source?.Cancel();
+                throw;
+            }
+        }
+        // Default semaphore slim wrapper
+        public async Task<TResult> AsyncThreadSafe<TClient, TParam, TResult>(
+            Func<TClient, TParam, CancellationToken, Task<TResult>> work,
+            TClient client, TParam param, 
+            SemaphoreSlim smf, CancellationToken ct)
+        {
+            await smf.WaitAsync(ct);
             try
             {
                 // execute work
-                
+                return await work(client, param, ct);
             }
             finally
             {
                 smf.Release();
             }
+        }
+        
+        public async Task<string> HttpGet(HttpClient client, string url, CancellationToken ct)
+        {
+            return await client.GetStringAsync(url, ct);
         }
     }
 }
