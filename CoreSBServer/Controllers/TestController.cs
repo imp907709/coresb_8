@@ -42,24 +42,5 @@ namespace CoreSBServer.Controllers
             return res;
         }
         
-        [HttpPost]
-        [Route("testprallelCount")]
-        public async Task<string> testprallelCount(TestParallelReq req)
-        {
-            var mth = new LiveParallelWrapper();
-
-            var tmr = new Stopwatch();
-            tmr.Start();
-            var res = await mth.GO(req.UrlsNumber, req.maxParallel);
-            tmr.Stop();
-            
-            var elpsd = tmr.Elapsed;
-
-            var header = $"Loaded: {req.UrlsNumber} in {req.maxParallel} in {elpsd}";
-            header += Environment.NewLine;
-            header += JsonSerializer.Serialize(res);
-            
-            return header;
-        }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Interviews;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 
 namespace CoreSBShared.Registrations
 {
@@ -7,8 +6,6 @@ namespace CoreSBShared.Registrations
     {
         public static void RunInitial(this WebApplicationBuilder builder)
         {
-            var intrvwA = new InterviewA();
-            intrvwA.GO();
         }
     }
 }

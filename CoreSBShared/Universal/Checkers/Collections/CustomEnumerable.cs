@@ -12,16 +12,17 @@ namespace InfrastructureCheckers.Collections
             var t = new CustomEnumerable<int>(arr);
 
             var outArr = new List<int>();
-            foreach (var i in t) {
-                var _i=i;
-                outArr.Add(_i+=1);
+            foreach (var i in t)
+            {
+                var _i = i;
+                outArr.Add(_i += 1);
             }
 
-            Console.WriteLine($@"Initial arr: {String.Join(',',arr)}");
-            Console.WriteLine($@"Result arr: {String.Join(',',outArr)}");
+            Console.WriteLine($@"Initial arr: {String.Join(',', arr)}");
+            Console.WriteLine($@"Result arr: {String.Join(',', outArr)}");
         }
     }
-    
+
     public class CustomEnumerable<T> : IEnumerable<T>
     {
         private T[] _item;
@@ -40,6 +41,7 @@ namespace InfrastructureCheckers.Collections
         {
             return this.GetEnumerator();
         }
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator1();
@@ -55,6 +57,7 @@ namespace InfrastructureCheckers.Collections
         {
             _col = item;
         }
+
         public bool MoveNext()
         {
             idx++;
@@ -74,11 +77,13 @@ namespace InfrastructureCheckers.Collections
         private T _current;
 
         public T Current => this._current;
-        
+
         private object Current1 { get { return this.Current; } }
         object IEnumerator.Current { get { return Current1; } }
 
+
         private bool isDisposed = false;
+
         public void Dispose()
         {
             this.Dispose(true);
@@ -87,7 +92,7 @@ namespace InfrastructureCheckers.Collections
 
         protected void Dispose(bool disposing)
         {
-            if(this.isDisposed)
+            if (this.isDisposed)
                 return;
 
             if (disposing)
@@ -105,5 +110,61 @@ namespace InfrastructureCheckers.Collections
         {
             this.Dispose(false);
         }
+    }
+
+
+    public class CustomEnumerableSimple<T> : IEnumerable<T>
+    {
+        private T[] _item;
+
+        public CustomEnumerableSimple(T[] item) { _item = item; }
+
+        public IEnumerator<T> GetEnumerator() => new CustomEnumerator<T>(_item);
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    public class CustomEnumeratorSimple<T> : IEnumerator<T>
+    {
+        private T[] _col;
+        private int idx = -1;
+        private T _current;
+
+        public CustomEnumeratorSimple(T[] item) => _col = item;
+
+        public bool MoveNext()
+        {
+            idx++;
+            if (idx >= _col.Length) return false;
+            _current = _col[idx];
+            return true;
+        }
+
+        public void Reset()
+        {
+            idx = -1;
+            _current = default;
+        }
+
+        public T Current => _current;
+        object IEnumerator.Current => Current;
+
+        private bool isDisposed = false;
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected void Dispose(bool disposing)
+        {
+            if (isDisposed) return;
+            _col = null;
+            _current = default;
+            isDisposed = true;
+        }
+
+        ~CustomEnumeratorSimple() => Dispose(false);
     }
 }

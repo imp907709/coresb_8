@@ -4,9 +4,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Interviews;
-using LINQtoObjectsCheck;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace CoreSBServer.Controllers
 {

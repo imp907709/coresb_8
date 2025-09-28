@@ -39,60 +39,9 @@ namespace Live
         }
     }
 
-    
-    public class LiveParallelWrapper
+
+    public class LiveConcurrencyTask
     {
- 
-        private string urlGet = "https://fake-json-api.mock.beeceptor.com/users";
-
-        public async Task<IEnumerable<string>> GO(int maxUrls,int maxParallel)
-        {
-            var urls = Enumerable.Range(0, maxUrls).Select(s => {
-                return urlGet;
-            });
-            
-            using var client = new HttpClient();
-
-            return await ExecuteWrapper(client, urls, maxParallel);
-        }
-
-        public async Task<IEnumerable<string>> ExecuteWrapper(HttpClient client, IEnumerable<string> urls, int maxParallel)
-        {
-            using var cts = new CancellationTokenSource();
-            using var smf = new SemaphoreSlim(maxParallel, maxParallel);
-
-            var orders = urls.Select(s => {
-                return ExecuteSingle<string>(client, s, cts, smf, HttpRequester.HttpGetSt);
-            });
-
-            try
-            {
-                return await Task.WhenAll(orders);
-            }
-            catch (Exception e)
-            {
-                cts.Cancel();
-                throw;
-            }
-   
-        }
-        public async Task<T> ExecuteSingle<T>(HttpClient client, string url, CancellationTokenSource cts, SemaphoreSlim smf,
-            Func<HttpClient,string,CancellationToken,Task<T>> action)
-        {
-            await smf.WaitAsync(cts.Token);
-            try
-            {
-                return await action(client, url, cts.Token);
-            }
-            catch (Exception e)
-            {
-                cts.Cancel();
-                throw;
-            }
-            finally
-            {
-                smf.Release();
-            }
-        }
+        
     }
 }
