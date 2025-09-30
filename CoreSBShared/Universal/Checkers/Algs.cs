@@ -136,6 +136,22 @@ namespace InfrastructureCheckers
 
             return maxLen;
         }
-    
+    }
+
+    public class HashMaps
+    {
+        public Dictionary<char, int> CharFreq(string s)
+        {
+            var dict = new Dictionary<char, int>();
+            foreach (var c in s)
+            {
+                // initialize
+                if (!dict.ContainsKey(c)) dict[c] = 0;
+                // set
+                dict[c]++;
+            }
+
+            return dict;
+        }
     }
 }
