@@ -1,8 +1,10 @@
 ﻿
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreSBShared.Universal.Checkers.Threading;
@@ -32,16 +34,6 @@ namespace Live
             var res = arr.CustomWhere(s => s % 2 != 0);
             PrntArrRes(arr, res);
         }
-
-        public static void MehtodsRevice()
-        {
-            
-        }
     }
-
-
-    public class LiveConcurrencyTask
-    {
-        
-    }
+    
 }
