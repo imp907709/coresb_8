@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.JavaScript;
 
 namespace InfrastructureCheckers
@@ -140,18 +141,55 @@ namespace InfrastructureCheckers
 
     public class HashMaps
     {
-        public Dictionary<char, int> CharFreq(string s)
-        {
-            var dict = new Dictionary<char, int>();
-            foreach (var c in s)
-            {
-                // initialize
-                if (!dict.ContainsKey(c)) dict[c] = 0;
-                // set
-                dict[c]++;
+        public Dictionary<char,int> CountChars(string s){
+            var set = new Dictionary<char,int>();
+	
+            foreach(var c in s){
+                if(!set.ContainsKey(c))
+                    set[c]=0;
+		
+                set[c]++;
             }
+	
+            return set;
+        }
 
-            return dict;
+    }
+
+    public class WithLinq
+    {
+        public static char FirstNonRep(string s)
+        {
+            // Implement a method that returns the first non-repeated character in a string.
+
+            var c = 
+                s.GroupBy(c => c)
+                    .Where(v => v.Count() == 1)
+                    .Select(b => b.Key)
+                    .FirstOrDefault();
+            return c;
+
+        }
+
+        public IEnumerable<int> TopN(IEnumerable<int> arr, int n)
+        {
+            var res = arr.GroupBy(x => x)
+                .Select(g => new {Val = g.Key, Cnt = g.Count()})
+                .OrderByDescending(b => b.Cnt)
+                .Take(n).Select(s=>s.Val);
+
+            return res;
+        }
+        
+        
+        public char MostFreq(string s){
+            var chr = s
+                .GroupBy(x=>x)
+                .Where(v=> v.Count() == 1)
+                .Select(b=>b.Key)
+                .FirstOrDefault();
+	
+            return chr;
         }
     }
 }

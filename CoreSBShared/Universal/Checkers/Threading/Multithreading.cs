@@ -5,13 +5,14 @@ using System.Net.Http;
 using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 using System.Threading.Tasks;
+using InfrastructureCheckers;
 
 namespace CoreSBShared.Universal.Checkers.Threading
 {
     public class MultithreadingCheck
     {
         // private string urlGet = "https://api.restful-api.dev/objects";
-        private string urlGet = "https://fake-json-api.mock.beeceptor.com/users";
+        private string urlGet = ConstantsCheckers.testApiURl2;
 
 
         public async Task<IEnumerable<string>> GO(int count, int maxParallel)
