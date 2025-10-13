@@ -12,9 +12,9 @@ namespace CoreSBShared.Universal.Infrastructure.Elastic
         public Task<IndexResponse> AddAsyncElk<T>(T item) where T : class;
 
         public new Task<IEnumerable<T>> GetByFilterAsync<T>(Expression<Func<T, bool>> expression)
-            where T : class, ICoreDalStrg;
+            where T : class, ICoreDalGnStr;
 
         public string CreateindexIfNotExists<T>(string indexName)
-            where T : class, ICoreDalStrg;
+            where T : class, ICoreDalGnStr;
     }
 }

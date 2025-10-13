@@ -1,4 +1,4 @@
-namespace CoreSBBL.Logging.Infrastructure.TC.Models
+namespace CoreSBBL.Logging.Infrastructure.TS.Models
 {
     public class Logs
     {

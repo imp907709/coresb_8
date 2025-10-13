@@ -1,5 +1,5 @@
 # Stage 1: Build the solution
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /app
 EXPOSE 5003/tcp
 
@@ -23,7 +23,7 @@ FROM build AS publish
 RUN dotnet publish CoreSBServer/CoreSBServer.csproj -c Release -o /app/publish --no-restore
 
 # Stage 3: Create the final runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 COPY --from=publish /app/publish .
 

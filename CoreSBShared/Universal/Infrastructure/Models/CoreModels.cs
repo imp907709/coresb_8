@@ -21,28 +21,33 @@ namespace CoreSBShared.Universal.Infrastructure.Models
         public DateTime? Modified { get; set; } = null;
     }
 
-        
     public interface ICoreTag
     {
         public int Index { get; set; }
         public string Text { get; set; }
     }
+
     
-   
+    
+    //TS
     // Type containing Id
     public class CoreDalint : CoreCreated, ICoreDalInt
     {
-        public int IdInt { get; set; }
+        public int Id { get; set; }
     }
     public class CoreDalObj : CoreCreated, ICoreDalObj
     {
-        public ObjectId IdStr { get; set; }
+        public ObjectId Id { get; set; }
     }
-    public class CoreDalStrg : ICoreDalStrg
+    public class CoreDalStrg : ICoreDalGnStr
     {
         public string Id { get; set; }
     }
     
+    
+    
+    //GN
+    //generic id 
     public class CoreDalInt : ICoreDal<int>
     {
         public int Id { get; set; }
@@ -53,24 +58,31 @@ namespace CoreSBShared.Universal.Infrastructure.Models
         public string Id { get; set; }
     }
     
+    
+    
+    //TS
+    //Core dal type specific ids
+    public class CoreDalGnInt : CoreCreated, ICoreDalGnInt
+    {
+        public int Id { get; set; }
+    }
+    public class CoreDalGnObj : CoreCreated, ICoreDalObjg
+    {
+        public ObjectId Id { get; set; }
+    }
+    public class CoreDalStringg : CoreCreated, ICoreDalGnStr
+    {
+        public string Id { get; set; }
+    }
+    
+    
+    
+    //Infrastructure specific
     //elk model
     [ElasticsearchType(IdProperty = "Id")]
     public class CoreElastic : CoreDalStrg
     {}
-
-    //Core dal generic ids
-    public class CoreDalIntg : CoreCreated, ICoreDalIntg
-    {
-        public int Id { get; set; }
-    }
-    public class CoreDalobjg : CoreCreated, ICoreDalObjg
-    {
-        public ObjectId Id { get; set; }
-    }
-    public class CoreDalStringg : CoreCreated, ICoreDalStrg
-    {
-        public string Id { get; set; }
-    }
+    
     
     
     /// <summary>

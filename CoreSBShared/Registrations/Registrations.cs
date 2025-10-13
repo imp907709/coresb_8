@@ -27,12 +27,12 @@ namespace CoreSBShared.Registrations
 
         public static void RegisterServices(this WebApplicationBuilder builder)
         {
-            RegisterEFStores(builder);
+            //RegisterEFStores(builder);
         }
 
         public static void RegisterContexts(this WebApplicationBuilder builder)
         {
-            RegisterEFContexts(builder);
+            //RegisterEFContexts(builder);
             RegisterMongoContexts(builder);
             RegisterElasticContexts(builder);
         }

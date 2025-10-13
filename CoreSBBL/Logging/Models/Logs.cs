@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using CoreSBBL.Logging.Models.DAL.TC;
+using CoreSBBL.Logging.Models.DAL.GN;
+using CoreSBBL.Logging.Models.DAL.TS;
+using CoreSBBL.Logging.Models.TC.DAL;
 using CoreSBShared.Universal.Infrastructure.Interfaces;
 using CoreSBShared.Universal.Infrastructure.Models;
 
 // Type containing ids like {idInt, idString, id Object}
-namespace CoreSBBL.Logging.Models.DAL.TC
+namespace CoreSBBL.Logging.Models.DAL.TS
 {
     // DOMAIN DAL TC
     // model containing domain fields, and id impl details like (int, string obj )
@@ -115,20 +118,23 @@ namespace CoreSBBL.Logging.Models.DAL.TC
 }
 
 
+
 // Generic ids ICoreDal<TKey>
 // like: ICoreDal<int> ICoreDal<string>
 namespace CoreSBBL.Logging.Models.DAL.GN
 {
-    public interface ILogsDALCore: ICoreCreated
+    public interface IMessageCreated: ICoreCreated
     {
         public string? Message { get; set; } 
     }
     
-    public class LogsDALEfGn : CoreDalIntg, ILogsDALCore
+    public class LoggingDalEfInt : CoreDalGnInt, IMessageCreated
     {
         public string? Message { get; set; }
     }
+
 }
+
 
 
 // Business layer models
@@ -137,6 +143,28 @@ namespace CoreSBBL.Logging.Models.TC.BL
     public class LogsBL : LogsDALEfTc
     {
     }
+
+    public class LoggingResp
+    {
+        public string name { get; set; }
+        public int? id1 { get; set; } 
+        public int? id2 { get; set; }
+        public Guid? id3 { get; set; }
+    }
+
+    public class LoggingGenericBLAdd : ILoggingGeneric
+    {
+        public string? Message { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime? Created { get; set; }
+        public DateTime? Modified { get; set; }
+    }
+
+    public class LoggingGenericBLGetInt : LoggingGenericBLAdd
+    {
+        public int Id { get; set; }
+    }
+
 }
 
 // Contollers and API layer models
@@ -145,5 +173,35 @@ namespace CoreSBBL.Logging.Models.TC.API
     public class LogsAPI
     {
         public string Message { get; set; } = DefaultModelValues.Logging.MessageEmpty;
+    }
+}
+
+
+
+
+namespace CoreSBBL.Logging.Models.TC.DAL
+{
+    public interface ILoggingGeneric : IMessage, ICoreCreated{}
+    public class LoggingGeneric : ILoggingGeneric
+    {
+        public string? Message { get; set; }
+        public string CreatedBy { get; set; } = "Default";
+        public DateTime? Created { get; set; }
+        public DateTime? Modified { get; set; }
+    }
+    public class LoggingGenericInt : LoggingGeneric, ICoreDalInt
+    {
+        public int Id { get; set; }
+
+    }
+    public class LoggingGenericString : LoggingGeneric, ICoreDalString
+    {
+        public string Id { get; set; }
+ 
+    }
+    public class LoggingGenericGuid : LoggingGeneric, ICoreDalGuid
+    {
+        public Guid Id { get; set; }
+ 
     }
 }

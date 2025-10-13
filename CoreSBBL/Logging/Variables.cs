@@ -1,6 +1,6 @@
 ﻿// Domain Logging specific strings 
 
-using CoreSBBL.Logging.Models.DAL.TC;
+using CoreSBBL.Logging.Models.DAL.TS;
 
 namespace CoreSBBL.Logging
 {

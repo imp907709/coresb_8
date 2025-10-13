@@ -8,9 +8,9 @@ namespace CoreSBServer.Controllers
 {
     public class LoggingController : ControllerBase
     {
-        private readonly ILoggingService _loggingService;
+        private readonly ILoggingServiceNew _loggingService;
 
-        public LoggingController(ILoggingService loggingService)
+        public LoggingController(ILoggingServiceNew loggingService)
         {
             _loggingService = loggingService;
         }
@@ -19,9 +19,18 @@ namespace CoreSBServer.Controllers
         [Route("AddToAll")]
         public async Task<ActionResult> AddToAll(LogsAPI item)
         {
-            var resp = await _loggingService.AddToAll(new LogsBL {Message = item.Message});
+            var resp = await _loggingService.AddToAll(new LoggingGenericBLAdd() {Message = item.Message});
 
             return Ok(resp);
+        }
+        
+        [HttpGet]
+        [Route("RecreateDB")]
+        public async Task<ActionResult> RecreateDB()
+        {
+            var resp = await _loggingService.RecreateDB();
+
+            return Ok($"Recreated : {resp}");
         }
     }
 }

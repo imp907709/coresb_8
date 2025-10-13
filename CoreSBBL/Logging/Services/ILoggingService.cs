@@ -1,10 +1,14 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using CoreSBBL.Logging.Models.TC.BL;
 
 namespace CoreSBBL.Logging.Services
 {
-    public interface ILoggingService
+    public interface ILoggingServiceNew
     {
-        Task<LogsBL> AddToAll(LogsBL item);
+
+        Task<LoggingResp> AddToAll(LoggingGenericBLAdd item);
+
+        Task<bool> RecreateDB();
     }
 }

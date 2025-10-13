@@ -1,5 +1,8 @@
 # Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP .NET Core service.
 
+# kibana install guide    
+#https://www.elastic.co/blog/getting-started-with-the-elastic-stack-and-docker-compose
+
 version: '3.4'
 
 services:
@@ -10,7 +13,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     ports:
-      - 5003:80
+      - 5003:8080
     depends_on:
         - sqldb
     environment:
@@ -22,7 +25,7 @@ services:
     container_name: MSSQLSB
     image: mcr.microsoft.com/mssql/server
     ports: 
-        - "1433:1433"
+        - "1444:1433"
     environment:
         SA_PASSWORD: "awsedrQ1"
         ACCEPT_EULA: "Y"
@@ -38,16 +41,17 @@ services:
       - cluster.routing.allocation.disk.threshold_enabled=false
       - xpack.license.self_generated.type=trial
       - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=true
       - ELASTIC_PASSWORD=awsedrQ1
     ulimits:
       memlock:
         soft: -1
         hard: -1
     ports:
-      - 9200:9200
-      - 9300:9300
+      - 9222:9200      
     networks: 
         - elastic
+
 
   kibana:
     container_name: kibanaSB
@@ -55,13 +59,17 @@ services:
     image: "docker.elastic.co/kibana/kibana:8.5.3"
     ports: 
         - 5601:5601
+    # important for jibana elastic visibility - ref host
+    depends_on:
+        - elasticsearch
     networks: 
         - elastic
     environment:
         - SERVERNAME=kibana
-        #- ELASTICSEARCH_HOSTS=https://localhost:9200
-        - ELASTICSEARCH_USERNAME=kibana_system
-        - ELASTICSEARCH_PASSWORD=awsedrQ1      
+        # important for jibana elastic visibility - ref host
+        - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+        # - ELASTICSEARCH_USERNAME=elastic
+        # - ELASTICSEARCH_PASSWORD=awsedrQ1      
 
   mongo:
     container_name: mongoSB
@@ -73,6 +81,18 @@ services:
     ports: 
         - 27017:27017
 
+  rabbitmq:
+    container_name: rabbitsb
+    image: rabbitmq:3-management-alpine
+    ports:
+        - 5672:5672
+        - 15672:15672
+    networks: 
+        - elastic
+    environment:
+        RABBITMQ_DEFAULT_USER: user
+        RABBITMQ_DEFAULT_PASS: user
+  
 # intraservice visibility
 networks:
     elastic:
