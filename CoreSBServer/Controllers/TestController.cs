@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using CoreSBBL.Logging.Services;
 using CoreSBShared.Universal.Checkers.Threading;
@@ -18,7 +20,20 @@ namespace CoreSBServer.Controllers
         {
             _loggingService = loggingService;
         }
-
+        private async void DoWorkAsync()
+        {
+            await Task.Delay(100);
+            throw new Exception("Boom!");
+        }
+        
+        [HttpGet]
+        [Route("AsyncVoid")]
+        public IActionResult AsyncVoid()
+        {
+            DoWorkAsync(); // async void
+            return Ok();
+        }
+        
         [HttpGet]
         [Route("test")]
         public ActionResult  Test()
@@ -37,9 +52,12 @@ namespace CoreSBServer.Controllers
         public async Task<IEnumerable<string>> testprallel(TestParallelReq req)
         {
             var mth = new MultithreadingCheck();
+            var ct = new CancellationToken();
+            // var res = await mth.GO(req.UrlsNumber, req.maxParallel);
 
-            var res = await mth.GO(req.UrlsNumber, req.maxParallel);
-            return res;
+            var lv = new LiveCheck();
+            var enm = Enumerable.Range(0, 1).Select(n => n.ToString()).ToList();
+            return await Task.FromResult(enm);
         }
         
     }

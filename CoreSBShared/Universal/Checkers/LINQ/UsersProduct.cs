@@ -89,22 +89,27 @@ namespace LiveCodingPrep
             Console.WriteLine($" - {u.Name}");
             }
 
+
+                    
             // ================== Join / Left Join ==================
             // TASK: Inner join users + products by Id
             var userProductJoin =
-            from u in users
-            join p in products on u.Id equals p.Id
-            select new { u.Name, Product = p.Title };
+                from u in users
+                join p in products on u.Id equals p.Id
+                select new { u.Name, Product = p.Title };
             Console.WriteLine("Inner Join (User ID = Product ID):");
             foreach (var up in userProductJoin)
             Console.WriteLine($"{up.Name} - {up.Product}");
 
             // TASK: Left join users + products (users may not have matching product)
             var leftJoin =
-            from u in users
-            join p in products on u.Id equals p.Id into upGroup
-            from p in upGroup.DefaultIfEmpty()
-            select new { u.Name, Product = p?.Title ?? "No Product" };
+                from u in users
+                    join p in products on u.Id equals p.Id 
+                        // left part
+                        into upGroup
+                        from p in upGroup.DefaultIfEmpty()
+                select new { u.Name, Product = p?.Title ?? "No Product" };
+            
             Console.WriteLine("Left Join (User -> Product):");
             foreach (var up in leftJoin)
             Console.WriteLine($"{up.Name} - {up.Product}");
@@ -113,8 +118,8 @@ namespace LiveCodingPrep
             // TASK: Implement async method to fetch all products
             async Task<List<ProductLive>> GetAllProductsAsync()
             {
-            await Task.Delay(500); // simulate async network delay
-            return products;
+                await Task.Delay(500); // simulate async network delay
+                return products;
             }
 
             // TASK: Call async method and await results
@@ -147,6 +152,20 @@ namespace LiveCodingPrep
             // TASK: Demonstrate readonly / record usage
             var ru = new ReadonlyUser(1, "Alice", "NY");
             // ru.Name = "Bob"; // ❌ compilation error (readonly simulation)
+            
+            
+            
+            // inner join 
+            var innerJoin = from u in users
+                join p in products on u.Id equals p.Id
+                select new {user = u.Name, product = p.Title};
+
+            // left join
+            var lefJOin = from u in users
+                join p in products on u.Id equals p.Id
+                    into g
+                from p in g.DefaultIfEmpty()
+                select new {user = u.Name, title = p.Title};
         }
 
         // Top-level record declaration inside namespace/class scope

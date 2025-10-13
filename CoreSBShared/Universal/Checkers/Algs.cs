@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.JavaScript;
+using LINQtoObjectsCheck;
+using MongoDB.Driver.Linq;
 
 namespace InfrastructureCheckers
 {
@@ -113,7 +115,8 @@ namespace InfrastructureCheckers
                 if (count[c] < 0) return false;
             }
 
-            return true;
+            return count.Values.All(v => v == 0);
+
         }
     }
 
@@ -171,7 +174,7 @@ namespace InfrastructureCheckers
 
         }
 
-        public IEnumerable<int> TopN(IEnumerable<int> arr, int n)
+        public IEnumerable<int> TopNmostFrequent(IEnumerable<int> arr, int n)
         {
             var res = arr.GroupBy(x => x)
                 .Select(g => new {Val = g.Key, Cnt = g.Count()})
@@ -180,16 +183,6 @@ namespace InfrastructureCheckers
 
             return res;
         }
-        
-        
-        public char MostFreq(string s){
-            var chr = s
-                .GroupBy(x=>x)
-                .Where(v=> v.Count() == 1)
-                .Select(b=>b.Key)
-                .FirstOrDefault();
-	
-            return chr;
-        }
+
     }
 }

@@ -22,8 +22,7 @@ namespace InfrastructureCheckers
         public static void Filter()
         {
             // Example data
-            var employees = new List<Employee>
-            {
+            var employees = new List<Employee> {
                 new Employee { Id = 1, Name = "Alice", Department = "HR", Salary = 55000 },
                 new Employee { Id = 2, Name = "Bob", Department = "IT", Salary = 75000 },
                 new Employee { Id = 3, Name = "Charlie", Department = "IT", Salary = 80000 },
@@ -43,7 +42,7 @@ namespace InfrastructureCheckers
             var maxDep = employees.GroupBy(d => d.Department)
                 .Select(s => new {Dep = s.Key, Sal = s.Max(v => v.Salary)})
                 .ToList();
-            
+
             // max avg salary
             var maxAvgDep = employees.GroupBy(d => d.Department)
                 .Select(s => new {Dep = s.Key, Sal = s.Average(v => v.Salary)})
@@ -51,13 +50,7 @@ namespace InfrastructureCheckers
                 .FirstOrDefault();
             
             
-            var emp = employees
-                .GroupBy(g=>g.Department)
-                .Select(s=>new {dep = s.Key, avg = s.Average(v=>v.Salary)})
-                .OrderByDescending(o=>o.avg)
-                .FirstOrDefault();
-            
-            
+     
             
             // largest payed per dep
             var topEmployeesPerDept = employees
@@ -68,9 +61,25 @@ namespace InfrastructureCheckers
             var largestSlPerDep = employees.GroupBy(g=>g.Department)
                 .Select(s=>s.OrderByDescending(v=>v.Salary).First()).ToList();
             
+            
+            
+            // avarage sal
+            var emp = employees
+                .GroupBy(g=>g.Department)
+                .Select(s=>new {dep = s.Key, avg = s.Average(v=>v.Salary)})
+                .OrderByDescending(o=>o.avg)
+                .FirstOrDefault();
+            
             // Select the top 3 highest paid employees in each department. Mode: GroupBy + projection. Focus: Grouping, ordering, Take.
             var largest3PerDep = employees.GroupBy(g=>g.Department)
                 .Select(s=>s.OrderByDescending(v=>v.Salary).Take(3)).ToList();
+
+            var largest3PerDeps = employees.GroupBy(g=>g.Department)
+                .SelectMany(s=>s.OrderByDescending(v=>v.Salary).Take(3)).ToList();
+            
+            var str = "aaabbcc";
+            var maxCnt = str.GroupBy(g => g).Select(s => new {ch = s.Key, cnt = s.Count(c => c != null)})
+                .OrderByDescending(o => o.cnt).FirstOrDefault();
         }
     }
     
