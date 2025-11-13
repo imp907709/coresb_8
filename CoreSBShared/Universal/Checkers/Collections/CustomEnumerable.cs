@@ -75,9 +75,9 @@ namespace InfrastructureCheckers.Collections
         }
 
         private T _current;
-
         public T Current => this._current;
 
+        
         private object Current1 { get { return this.Current; } }
         object IEnumerator.Current { get { return Current1; } }
 

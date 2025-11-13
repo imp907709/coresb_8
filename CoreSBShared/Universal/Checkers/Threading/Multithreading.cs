@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -9,43 +10,88 @@ using InfrastructureCheckers;
 
 namespace CoreSBShared.Universal.Checkers.Threading
 {
+    public class IndexedResp
+    {
+        public int idx { get; set; }
+        public string resp { get; set; }
+    }
     public class MultithreadingCheck
     {
         // private string urlGet = "https://api.restful-api.dev/objects";
         private string urlGet = ConstantsCheckers.testApiURl2;
 
 
-        public async Task<IEnumerable<string>> GO(int count, int maxParallel)
+        public async Task<IEnumerable<IndexedResp>> GO(int count, int maxParallel)
         {
             var urls = Enumerable.Range(0, count).Select(s => { return urlGet; });
-            return await ParallelHttpGet(urls, maxParallel);
+            var resp = await GetParallel(urls, maxParallel);
+            // var resp = await GetWhenAll(urls, maxParallel);
+            return resp.Select(s=> new IndexedResp() { idx=s.Key, resp = s.Value});
         }
 
         // fails on first
-        public async Task<IEnumerable<string>> ParallelHttpGet(IEnumerable<string> urls, int maxParallel)
+        public async Task<ConcurrentDictionary<int,string>> GetWhenAll(IEnumerable<string> urls, int maxParallel)
         {
+            var res = new ConcurrentDictionary<int, string>();
+            
             using var _client = new HttpClient();
             using var cts = new CancellationTokenSource();
 
             using var smf = new SemaphoreSlim(maxParallel, maxParallel);
 
-            var orders = urls.Select(s =>
-            {
-                var tsk = ParallelHttpWrapper
-                    .RunParallel<string>(_client, s, cts, smf, HttpRequester.HttpGetSt);
-                return tsk;
+            var orders = urls.Select(async (url,idx) => {
+                var resp = await ParallelHttpWrapper
+                    .RunParallel<string>(_client, url, cts, smf, HttpRequester.HttpGetSt);
+                res[idx] = resp;
             });
 
             try
             {
-                var results = await Task.WhenAll(orders);
-                return results;
+                await Task.WhenAll(orders);
             }
             catch (Exception e)
             {
                 cts.Cancel();
                 throw;
             }
+
+            return res;
+        }
+
+        public async Task<ConcurrentDictionary<int,string>> GetParallel(IEnumerable<string> urls, int maxParallel)
+        {
+            var res = new ConcurrentDictionary<int, string>();
+            
+            using var _client = new HttpClient();
+            using var cts = new CancellationTokenSource();
+
+            var orders = urls.Select((url, idx) => (url, idx));
+
+            try
+            {
+                await Parallel.ForEachAsync(orders,
+                    new ParallelOptions() {MaxDegreeOfParallelism = maxParallel, CancellationToken = cts.Token},
+                    async (s, ct) => {
+
+                        try
+                        {
+                            var resp = await HttpRequester.HttpGetSt(_client, s.url, ct);
+                            res[s.idx] = resp;
+                        }
+                        catch (Exception e)
+                        {
+                            cts.Cancel();
+                            throw;
+                        }
+                    });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"{e.Message}");
+                throw;
+            }
+
+            return res;
         }
     }
 

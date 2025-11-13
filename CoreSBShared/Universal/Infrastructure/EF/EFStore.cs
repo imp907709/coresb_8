@@ -255,15 +255,61 @@ namespace CoreSBShared.Universal.Infrastructure.EF.Store
         {
             _context = context;
         }
-
-        public async Task<T> AddItemAsync<T>(T item) 
-            where T: class
+        
+        public async Task<T> GetByIdAsync<T, TKey>(TKey id) where T : class, ICoreDal<TKey>
         {
-            var res = await _context.Set<T>().AddAsync(item);
-            if (res?.Entity != null)
-                await _context.SaveChangesAsync();
+            return await _context.Set<T>().FirstOrDefaultAsync(x => x.Id.Equals(id));
+        }
 
-            return res?.Entity;
+        public async Task<T?> GetByIdAsync<T>(int id) where T : class, ICoreDalGnInt
+        {
+            return await _context.Set<T>().FirstOrDefaultAsync(x => x.Id == id);
+        }
+        public async Task<T?> GetByIdAsync<T>(Guid id) where T : class, ICoreDalGuid
+        {
+            return await _context.Set<T>().FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+
+        public async Task<T> AddAsync<T>(T item) where T : class
+        {
+            await _context.Set<T>().AddAsync(item);
+            await _context.SaveChangesAsync();
+            return item;
+        }
+
+        public async Task<IEnumerable<T>> AddManyAsync<T>(IEnumerable<T> items) where T : class
+        {
+            await _context.Set<T>().AddRangeAsync(items);
+            await _context.SaveChangesAsync();
+            return items;
+        }
+
+        public async Task<IEnumerable<T>> GetByFilterAsync<T>(Expression<Func<T, bool>> expression)
+            where T : class, ICoreDalGnInt
+        {
+            return await _context.Set<T>().Where(expression).ToListAsync();
+        }
+
+        public async Task<T> UpdateAsync<T>(T item) where T : class
+        {
+            _context.Entry(item).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return item;
+        }
+
+        public async Task<bool> DeleteAsync<T>(T item) where T : class
+        {
+            _context.Set<T>().Remove(item);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<IEnumerable<T>> DeleteManyAsync<T>(IEnumerable<T> items) where T : class
+        {
+            _context.Set<T>().RemoveRange(items);
+            await _context.SaveChangesAsync();
+            return items;
         }
 
         public async Task<int> SaveChangesAsync()

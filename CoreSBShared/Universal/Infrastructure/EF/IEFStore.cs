@@ -88,9 +88,18 @@ namespace CoreSBShared.Universal.Infrastructure.EF.Store
     public interface IEFStoreGeneric<TContext>
         where TContext : DbContext
     {
-        Task<T> AddItemAsync<T>(T item)
-            where T : class;
-
+        
+        Task<T> AddAsync<T>(T item) where T : class;
+        Task<IEnumerable<T>> AddManyAsync<T>(IEnumerable<T> items) where T : class;
+   
+        Task<T?> GetByIdAsync<T>(int id) where T : class, ICoreDalGnInt;
+        Task<IEnumerable<T>> GetByFilterAsync<T>(Expression<Func<T, bool>> expression) where T : class, ICoreDalGnInt;
+        
+        Task<T> UpdateAsync<T>(T item) where T : class;
+        
+        Task<bool> DeleteAsync<T>(T item) where T : class;
+        Task<IEnumerable<T>> DeleteManyAsync<T>(IEnumerable<T> items) where T : class;
+        
         Task<int> SaveChangesAsync();
 
         Task<bool> CreateDB();

@@ -98,7 +98,7 @@ namespace CoreSBBL.Logging.Infrastructure.Generic
             {
                 Created = DateTime.Now, Modified = DateTime.Now, Message = item.Message, CreatedBy = item.CreatedBy
             };
-            var res = await _storeEF2.AddItemAsync(toAdd);
+            var res = await _storeEF2.AddAsync(toAdd);
             return new LoggingGenericBLGetInt()
             {
                 Id = res.Id, Created = res.Created, Message = res.Message
@@ -111,7 +111,7 @@ namespace CoreSBBL.Logging.Infrastructure.Generic
             {
                 Created = DateTime.Now, Modified = DateTime.Now, Message = item.Message, CreatedBy = item.CreatedBy
             };
-            var res = await _storeEF.AddItemAsync(toAdd);
+            var res = await _storeEF.AddAsync(toAdd);
             return new LoggingGenericBLGetInt()
             {
                 Id = res.Id, Created = res.Created, Message = res.Message
@@ -121,13 +121,13 @@ namespace CoreSBBL.Logging.Infrastructure.Generic
         
         public async Task<LoggingGenericString> AddItem(LoggingGenericString item)
         {
-            var res = await _storeEF.AddItemAsync(item);
+            var res = await _storeEF.AddAsync(item);
             return res;
         }
         
         public async Task<LoggingGenericGuid> AddItem(LoggingGenericGuid item)
         {
-            var res = await _storeEF.AddItemAsync(item);
+            var res = await _storeEF.AddAsync(item);
             return res;
         }
 
