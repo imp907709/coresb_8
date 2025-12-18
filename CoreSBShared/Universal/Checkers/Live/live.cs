@@ -26,9 +26,20 @@ namespace Live
     {
         public static void GO()
         {
-
             var url = ConstantsCheckers.testApiURl2;
         }
+
+        public void Blocked()
+        {
+            var item = SomeAsync().Result;
+            var fix = SomeAsync().GetAwaiter().GetResult();
+        }
+        public async Task<int> SomeAsync()
+        {
+            await Task.Delay(1);
+            return 1;
+        }
+
     }
 
 }

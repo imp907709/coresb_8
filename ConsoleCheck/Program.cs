@@ -6,4 +6,6 @@ using Live;
 
 CustomEnumerableCheck.GO();
 
-{ }
+{
+    LiveCheck.GO();
+}
