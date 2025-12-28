@@ -5,7 +5,6 @@ using InfrastructureCheckers.Collections;
 using Live;
 
 CustomEnumerableCheck.GO();
-
 {
     LiveCheck.GO();
 }
