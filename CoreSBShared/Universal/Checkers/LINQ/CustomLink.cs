@@ -22,11 +22,7 @@ namespace CoreSBShared.Universal.Checkers.LINQ
         {
             var arr = new List<int>()
             {
-                1,
-                2,
-                3,
-                4,
-                5
+                1, 2, 3, 4, 5
             };
             var res = arr.CustomWhere(s => s % 2 != 0);
             PrintArrRes(arr, res);

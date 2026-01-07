@@ -10,17 +10,15 @@ using InfrastructureCheckers;
 
 namespace CoreSBShared.Universal.Checkers.Threading
 {
-    public class IndexedResp
-    {
-        public int idx { get; set; }
-        public string resp { get; set; }
-    }
+
+    // Make it allocation-minimal
+    // Make it exception-single (unwrap first failure)
     public class MultithreadingCheck
     {
         // private string urlGet = "https://api.restful-api.dev/objects";
         private string urlGet = ConstantsCheckers.testApiURl2;
 
-
+        // Validate maxParallel: <= 0 will effectively deadlock.
         public async Task<IEnumerable<IndexedResp>> GO(int count, int maxParallel)
         {
             var urls = Enumerable.Range(0, count).Select(s => { return urlGet; });
@@ -30,7 +28,8 @@ namespace CoreSBShared.Universal.Checkers.Threading
         }
 
         // fails on first
-        public async Task<ConcurrentDictionary<int,string>> GetWhenAll(IEnumerable<string> urls, int maxParallel)
+        // Check maxparallel > 0 
+        public async Task<ConcurrentDictionary<int,string>> GetWhenAllLinq(IEnumerable<string> urls, int maxParallel)
         {
             var res = new ConcurrentDictionary<int, string>();
             
@@ -45,15 +44,7 @@ namespace CoreSBShared.Universal.Checkers.Threading
                 res[idx] = resp;
             });
 
-            try
-            {
-                await Task.WhenAll(orders);
-            }
-            catch (Exception e)
-            {
-                cts.Cancel();
-                throw;
-            }
+            await Task.WhenAll(orders);
 
             return res;
         }
@@ -76,6 +67,7 @@ namespace CoreSBShared.Universal.Checkers.Threading
                         try
                         {
                             var resp = await HttpRequester.HttpGetSt(_client, s.url, ct);
+                            
                             res[s.idx] = resp;
                         }
                         catch (Exception e)
@@ -113,11 +105,134 @@ namespace CoreSBShared.Universal.Checkers.Threading
             }
             finally
             {
-                smf.Release();
+                smf.Release(); 
             }
         }
     }
 
+
+
+    public class Parallelize
+    {
+        public async Task ParallelFor()
+        {
+            
+        }
+    }
+
+
+
+    
+    public class ParallelExamples
+    {
+        public async Task<IEnumerable<IIndexResp>> ParallelForInt (IEnumerable<string> urls)
+        {
+            var httpClient = new HttpClient();
+            var urlsArr = urls.ToArray();
+            
+            var tasks = new Task<IndexedResp>[urlsArr.Length];
+            
+            using var cts = new CancellationTokenSource();
+            using var smf = new SemaphoreSlim(2, 4);
+
+            var ind = 0;
+
+          
+            
+            // Task run not nessesary here 
+            for(var i = 0; i < urls.Count(); i++) {
+                int idx = i;
+                var r = Task.Run(async () =>
+                {
+                    await smf.WaitAsync(cts.Token);
+                    try
+                    {
+                        var resp = await HttpRequester.HttpGetSt(httpClient, urlsArr[i], cts.Token);
+                        return new IndexedResp {idx = idx, resp = resp};
+                    }
+                    catch (Exception e)
+                    {
+                        cts.Cancel();
+                        throw;
+                    }
+                    finally
+                    {
+                        smf.Release();
+                    }
+                    
+                } , cts.Token);
+                tasks[idx] = r;
+                
+                
+                // without task run 
+                // or => move to separate method
+                var url = urlsArr[i];
+                var r2 = new Func<Task<IndexedResp>>(async () => {
+                    await smf.WaitAsync(cts.Token);
+                    try
+                    {
+                        var resp = await HttpRequester.HttpGetSt(httpClient, url, cts.Token);
+                        return new IndexedResp {idx = idx, resp = resp};
+                    }
+                    catch (Exception e)
+                    {
+                        cts.Cancel();
+                        throw;
+                    }
+                    finally
+                    {
+                        smf.Release();
+                    }
+                });
+
+                var r3 = RunHttpGet(httpClient, url, cts, smf, i);
+                tasks[idx] = r3;
+                
+            }
+
+            
+            var response = await Task.WhenAll(tasks);
+            return response.ToList();
+        }
+
+        // separate method for lambda
+        public async Task<IndexedResp> RunHttpGet(HttpClient httpClient, string url, CancellationTokenSource cts, SemaphoreSlim smf, int id)
+        {
+            await smf.WaitAsync(cts.Token);
+            try
+            {
+                var resp = await HttpRequester.HttpGetSt(httpClient, url, cts.Token);
+                return new IndexedResp {idx = id, resp = resp};
+            }
+            catch (Exception e)
+            {
+                cts.Cancel();
+                throw;
+            }
+            finally
+            {
+                smf.Release();
+            }
+        }
+    }
+   
+    
+    
+    
+    
+    
+    // interface to keep id to response 
+    public interface IIndexResp
+    {
+        public int idx { get; set; }
+        public string resp { get; set; }
+    }
+    public class IndexedResp : IIndexResp
+    {
+        public int idx { get; set; }
+        public string resp { get; set; }
+    }
+    // actual method to parallelize
     public class HttpRequester
     {
         public static async Task<string> HttpGetSt(HttpClient _client, string url, CancellationToken ct)
