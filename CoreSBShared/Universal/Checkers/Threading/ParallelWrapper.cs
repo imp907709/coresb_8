@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace CoreSBShared.Universal.Checkers.Threading
 {
+    // Example of generic wrapper for parallel operations
     public static class ParallelAsyncExecutor
     {
         /// <summary>
