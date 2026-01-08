@@ -114,112 +114,6 @@ namespace CoreSBShared.Universal.Checkers.Threading
 
     public class ParallelExamplesAllInOne
     {
-        // all in one
-        public async Task<IEnumerable<IIndexResp>> ParallelForInt (IEnumerable<string> urls)
-        {
-            var httpClient = new HttpClient();
-            var urlsArr = urls.ToArray();
-            
-            var tasks = new Task<IndexedResp>[urlsArr.Length];
-            
-            using var cts = new CancellationTokenSource();
-            using var smf = new SemaphoreSlim(2, 4);
-
-            var ind = 0;
-            
-            // Task run not nessesary here 
-            for(var i = 0; i < urls.Count(); i++) {
-                
-                // ===================
-                // Option 1
-                int idx = i;
-                var r = Task.Run(async () =>
-                {
-                    await smf.WaitAsync(cts.Token);
-                    try
-                    {
-                        var resp = await HttpRequester.HttpGetSt(httpClient, urlsArr[i], cts.Token);
-                        return new IndexedResp {idx = idx, resp = resp};
-                    }
-                    catch (Exception e)
-                    {
-                        cts.Cancel();
-                        throw;
-                    }
-                    finally
-                    {
-                        smf.Release();
-                    }
-                    
-                } , cts.Token);
-                tasks[idx] = r;
-                
-                // ===================
-                // Option 2
-                // without task run 
-                // or => move to separate method
-                var url = urlsArr[i];
-                var r2 = new Func<Task<IndexedResp>>(async () => {
-                    await smf.WaitAsync(cts.Token);
-                    try
-                    {
-                        var resp = await HttpRequester.HttpGetSt(httpClient, url, cts.Token);
-                        return new IndexedResp {idx = idx, resp = resp};
-                    }
-                    catch (Exception e)
-                    {
-                        cts.Cancel();
-                        throw;
-                    }
-                    finally
-                    {
-                        smf.Release();
-                    }
-                });
-
-                var r3 = SemaphoreHttpSeparate(httpClient, url, cts, smf, i);
-                tasks[idx] = r3;
-
-            }
-            
-            var response = await Task.WhenAll(tasks);
-            return response.ToList();
-        }
-
-        public async Task<IEnumerable<IndexedResp>> ParallelFor(IEnumerable<string> urls, CancellationTokenSource cts, HttpClient httpClient)
-        {
-            var parallelResp = new IndexedResp[urls?.Count() ?? 0];
-            var orders = urls.Select((s, i) => new {s, i});
-            await Parallel.ForEachAsync(orders,
-                new ParallelOptions(){MaxDegreeOfParallelism = 10, CancellationToken = cts.Token},
-                async (c,ct) => {
-                    try
-                    {
-                        var resp = await HttpRequester.HttpGetSt(httpClient, c.s, ct);
-                        parallelResp[c.i] = new IndexedResp() {idx = c.i, resp = resp};
-                    }
-                    catch (Exception e)
-                    {
-                        cts.Cancel();
-                        throw;
-                    }
-                    
-                });
-
-            return parallelResp;
-
-        }
-        
- 
-       
-        
-        // semaphoreslim + task.run
-        // semaphoreslim + whenall
-        // parallel.forach
-        // + batch wrap
-
-
-        
         // Best for http, DB and I/O work
         // semaphoreslim + wait all
         // need batching wrapper for N > 10k
@@ -284,7 +178,30 @@ namespace CoreSBShared.Universal.Checkers.Threading
 
             return result;
         }
-
+        
+        // separate method for lambda usage
+        public async Task<IndexedResp> SemaphoreHttpSeparate(HttpClient httpClient, string url, CancellationTokenSource cts, SemaphoreSlim smf, int id)
+        {
+            await smf.WaitAsync(cts.Token);
+            try
+            {
+                var resp = await HttpRequester.HttpGetSt(httpClient, url, cts.Token);
+                return new IndexedResp {idx = id, resp = resp};
+            }
+            catch (Exception e)
+            {
+                cts.Cancel();
+                throw;
+            }
+            finally
+            {
+                smf.Release();
+            }
+        }
+        
+        
+        
+        
 
         // NOT best fit
         // with task run
@@ -313,7 +230,7 @@ namespace CoreSBShared.Universal.Checkers.Threading
                     try
                     {
                         var r =  await HttpRequester.HttpGetSt(httpClient, s, cts.Token);
-                        result[i] = r;
+                        result[i] = new IndexedResp(){idx = i, resp = r};
                     }
                     catch (Exception e)
                     {
@@ -357,29 +274,6 @@ namespace CoreSBShared.Universal.Checkers.Threading
 
             return result;
         }
-        
-        // ===================
-        // Option 3
-        // separate method for lambda
-        public async Task<IndexedResp> SemaphoreHttpSeparate(HttpClient httpClient, string url, CancellationTokenSource cts, SemaphoreSlim smf, int id)
-        {
-            await smf.WaitAsync(cts.Token);
-            try
-            {
-                var resp = await HttpRequester.HttpGetSt(httpClient, url, cts.Token);
-                return new IndexedResp {idx = id, resp = resp};
-            }
-            catch (Exception e)
-            {
-                cts.Cancel();
-                throw;
-            }
-            finally
-            {
-                smf.Release();
-            }
-        }
-
     }
 
     
