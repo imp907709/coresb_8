@@ -21,99 +21,18 @@ namespace CoreSBShared.Universal.Checkers.Threading
         // Validate maxParallel: <= 0 will effectively deadlock.
         public async Task<IEnumerable<IndexedResp>> GO(int count, int maxParallel)
         {
+            var resp = new List<IndexedResp>();
             var urls = Enumerable.Range(0, count).Select(s => { return urlGet; });
-            var resp = await GetParallel(urls, maxParallel);
             // var resp = await GetWhenAll(urls, maxParallel);
-            return resp.Select(s=> new IndexedResp() { idx=s.Key, resp = s.Value});
-        }
-
-        // fails on first
-        // Check maxparallel > 0 
-        public async Task<ConcurrentDictionary<int,string>> GetWhenAllLinq(IEnumerable<string> urls, int maxParallel)
-        {
-            var res = new ConcurrentDictionary<int, string>();
-            
-            using var _client = new HttpClient();
-            using var cts = new CancellationTokenSource();
-
-            using var smf = new SemaphoreSlim(maxParallel, maxParallel);
-
-            var orders = urls.Select(async (url,idx) => {
-                var resp = await ParallelHttpWrapper
-                    .RunParallel<string>(_client, url, cts, smf, HttpRequester.HttpGetSt);
-                res[idx] = resp;
-            });
-
-            await Task.WhenAll(orders);
-
-            return res;
-        }
-
-        public async Task<ConcurrentDictionary<int,string>> GetParallel(IEnumerable<string> urls, int maxParallel)
-        {
-            var res = new ConcurrentDictionary<int, string>();
-            
-            using var _client = new HttpClient();
-            using var cts = new CancellationTokenSource();
-
-            var orders = urls.Select((url, idx) => (url, idx));
-
-            try
-            {
-                await Parallel.ForEachAsync(orders,
-                    new ParallelOptions() {MaxDegreeOfParallelism = maxParallel, CancellationToken = cts.Token},
-                    async (s, ct) => {
-
-                        try
-                        {
-                            var resp = await HttpRequester.HttpGetSt(_client, s.url, ct);
-                            
-                            res[s.idx] = resp;
-                        }
-                        catch (Exception e)
-                        {
-                            cts.Cancel();
-                            throw;
-                        }
-                    });
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"{e.Message}");
-                throw;
-            }
-
-            return res;
+            return resp;
         }
     }
-
-    public static class ParallelHttpWrapper
-    {
-        public static async Task<T> RunParallel<T>(HttpClient _client, string url, CancellationTokenSource cts,
-            SemaphoreSlim smf, Func<HttpClient, string, CancellationToken, Task<T>> fnc)
-        {
-            await smf.WaitAsync(cts.Token);
-
-            try
-            {
-                return await fnc(_client, url, cts.Token);
-            }
-            catch (Exception e)
-            {
-                cts.Cancel();
-                throw;
-            }
-            finally
-            {
-                smf.Release(); 
-            }
-        }
-    }
-
-
-
+    
+    
+    
     public class ParallelExamplesAllInOne
     {
+        // OPTION 1 A
         // Best for http, DB and I/O work
         // semaphoreslim + wait all
         // need batching wrapper for N > 10k
@@ -199,10 +118,31 @@ namespace CoreSBShared.Universal.Checkers.Threading
             }
         }
         
-        
-        
-        
+        // OPTION 1 B
+        // fails on first
+        // Check maxparallel > 0
+        // calls wrapper semaphore method
+        public async Task<ConcurrentDictionary<int,string>> GetWhenAllLinq(IEnumerable<string> urls, int maxParallel)
+        {
+            var res = new ConcurrentDictionary<int, string>();
+            
+            using var _client = new HttpClient();
+            using var cts = new CancellationTokenSource();
 
+            using var smf = new SemaphoreSlim(maxParallel, maxParallel);
+
+            var orders = urls.Select(async (url,idx) =>
+            {
+                var resp = await SemaphoreHttpSeparate(_client, url, cts, smf, idx);
+                res[idx] = resp.resp;
+            });
+
+            await Task.WhenAll(orders);
+
+            return res;
+        }
+        
+        // OPTION 2
         // NOT best fit
         // with task run
         // creates tasks + state machine
@@ -246,6 +186,7 @@ namespace CoreSBShared.Universal.Checkers.Threading
             return result;
         }
         
+        // OPTION 3
         // NOT best fit
         // parallel for
         // also not ideal - while less memory footprint
@@ -262,8 +203,7 @@ namespace CoreSBShared.Universal.Checkers.Threading
             
             using var smf = new SemaphoreSlim(4);
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-
-
+            
        
             await Parallel.ForEachAsync(urls.Select((s,i)=>new {s,i}),
                 new ParallelOptions() {MaxDegreeOfParallelism = 10, CancellationToken = cts.Token},
@@ -275,9 +215,9 @@ namespace CoreSBShared.Universal.Checkers.Threading
             return result;
         }
     }
-
     
-
+    
+    
     // interface to keep id to response
     public interface IIndexResp
     {
