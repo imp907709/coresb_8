@@ -32,20 +32,10 @@ namespace InfrastructureCheckers.Collections
             _item = item;
         }
 
-        public IEnumerator<T> GetEnumerator()
-        {
-            return new CustomEnumerator<T>(_item);
-        }
-
-        private IEnumerator GetEnumerator1()
-        {
-            return this.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator1();
-        }
+        public IEnumerator<T> GetEnumerator() => new CustomEnumerator<T>(_item);
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        
+        // private IEnumerator GetEnumerator1() => this.GetEnumerator();
     }
 
     public class CustomEnumerator<T> : IEnumerator<T>

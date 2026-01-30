@@ -84,6 +84,7 @@ namespace CoreSBShared.Universal.Checkers.Threading
                 catch (Exception e)
                 {
                     cts.Cancel();
+                    // first exception wins
                     throw;
                 }
                 finally
@@ -101,7 +102,9 @@ namespace CoreSBShared.Universal.Checkers.Threading
         // separate method for lambda usage
         public async Task<IndexedResp> SemaphoreHttpSeparate(HttpClient httpClient, string url, CancellationTokenSource cts, SemaphoreSlim smf, int id)
         {
+            var acq = false;
             await smf.WaitAsync(cts.Token);
+            acq = true;
             try
             {
                 var resp = await HttpRequester.HttpGetSt(httpClient, url, cts.Token);
@@ -114,7 +117,8 @@ namespace CoreSBShared.Universal.Checkers.Threading
             }
             finally
             {
-                smf.Release();
+                if(acq)
+                    smf.Release();
             }
         }
         

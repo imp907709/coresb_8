@@ -4,7 +4,6 @@ using InfrastructureCheckers;
 using InfrastructureCheckers.Collections;
 using Live;
 
-CustomEnumerableCheck.GO();
-{
-    LiveCheck.GO();
-}
+// CustomEnumerableCheck.GO();
+
+await LiveCheck.GO();
