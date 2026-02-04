@@ -23,7 +23,6 @@ namespace Live
             fg.CallerWrong();
             await fg.CallerCorrect();
 
-            LINQcheck.GO();
             Blocked();
             HashConversionsIGS.GO();
         }

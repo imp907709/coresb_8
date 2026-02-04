@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreSBBL.Logging.Infrastructure.EF;
 using CoreSBBL.Logging.Services;
 using CoreSBShared.Universal.Infrastructure.HTTP.MyApp.Services.Http;
 using CoreSBShared.Universal.Checkers.Threading;
@@ -16,8 +17,10 @@ namespace CoreSBServer.Controllers
     public class TestController : ControllerBase
     {
         private readonly IHttpService _http;
-        public TestController(IHttpService http) {
+        private readonly ITestStore _testStore;
+        public TestController(IHttpService http, ITestStore testStore) {
             _http = http;
+            _testStore = testStore;
         }
         private async void DoWorkAsync()
         {
@@ -59,6 +62,14 @@ namespace CoreSBServer.Controllers
             var lv = new LiveCheck();
             var enm = Enumerable.Range(0, 1).Select(n => n.ToString()).ToList();
             return await Task.FromResult(enm);
+        }
+
+        [HttpGet]
+        [Route("testStoreGO")]
+        public async Task<ActionResult> testStoreGO()
+        {
+            await _testStore.GO();
+            return Ok();
         }
         
     }

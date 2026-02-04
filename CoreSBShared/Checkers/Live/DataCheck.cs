@@ -7,64 +7,57 @@ namespace Live
 {
     public class LINQcheck
     {
-        public static async Task GO()
+        // Top-level record declaration inside namespace/class scope
+        public record ReadonlyUser(int Id, string Name, string State);
+    }
+
+   
+
+    public class DataCheck
+    {
+        public static async Task SampleTemplates()
         {
             // ================== Sorting ==================
             // TASK: Sort users alphabetically by name
             var sortedUsers = SampleData.users.OrderBy(u => u.Name).ToList();
-            Console.WriteLine("Sorted Users:");
-            sortedUsers.ForEach(u => Console.WriteLine(u.Name));
 
             // TASK: Sort products by descending price and take top 2
             var topProducts = SampleData.products.OrderByDescending(p => p.Price).Take(2).ToList();
-            Console.WriteLine("Top 2 Expensive Products:");
-            topProducts.ForEach(p => Console.WriteLine($"{p.Title} - {p.Price}"));
 
             // ================== Filtering ==================
             // TASK: Filter users from NY state
             var nyUsers = SampleData.users.Where(u => u.State == "NY").ToList();
-            Console.WriteLine("NY Users:");
-            nyUsers.ForEach(u => Console.WriteLine(u.Name));
 
             // ================== Mapping ==================
             // TASK: Map users to simplified objects (name + Id)
             var simpleUsers = SampleData.users.Select(u => new {u.Name, u.Id}).ToList();
-            Console.WriteLine("Simplified Users:");
-            simpleUsers.ForEach(u => Console.WriteLine($"{u.Id} - {u.Name}"));
 
             // ================== Grouping ==================
             // TASK: Group users by single key (State) using method syntax
-            var usersByState = SampleData.users.GroupBy(u => u.State);
-            foreach (var group in usersByState)
-            {
-                Console.WriteLine($"State: {group.Key}");
-                foreach (var u in group)
-                    Console.WriteLine($" - {u.Name}");
-            }
+            var usersByState = SampleData.users
+                .GroupBy(u => u.State)
+                .SelectMany(s => s, (l,r) => new {
+                    k = l.Key, cntr = r.Name
+                });
 
             // TASK: Group users by multiple keys (State + Country) using query syntax
             var usersByStateCountry =
                 from u in SampleData.users
                 group u by new {u.State, u.Country}
                 into g
-                select g;
-            foreach (var g in usersByStateCountry)
-            {
-                Console.WriteLine($"State: {g.Key.State}, Country: {g.Key.Country}");
-                foreach (var u in g)
-                    Console.WriteLine($" - {u.Name}");
-            }
+                select new                 {
+                    k = g.Key.Country, c = g.Key.State
+                    , u = g.ToList()
+                };
+            
 
-
-            // ================== Join / Left Join ==================
+            // ================== Join ==================
             // TASK: Inner join users + products by Id
             var userProductJoin =
                 from u in SampleData.users
                 join p in SampleData.products on u.Id equals p.Id
                 select new {u.Name, Product = p.Title};
-            Console.WriteLine("Inner Join (User ID = Product ID):");
-            foreach (var up in userProductJoin)
-                Console.WriteLine($"{up.Name} - {up.Product}");
+
 
             // TASK: Left join users + products (users may not have matching product)
             var leftJoin =
@@ -74,10 +67,7 @@ namespace Live
                     into upGroup
                 from p in upGroup.DefaultIfEmpty()
                 select new {u.Name, Product = p?.Title ?? "No Product"};
-
-            Console.WriteLine("Left Join (User -> Product):");
-            foreach (var up in leftJoin)
-                Console.WriteLine($"{up.Name} - {up.Product}");
+            
 
             // ================== Async / Task ==================
             // TASK: Implement async method to fetch all products
@@ -89,36 +79,18 @@ namespace Live
 
             // TASK: Call async method and await results
             var asyncProducts = await GetAllProductsAsync();
-            Console.WriteLine("Async Products:");
-            asyncProducts.ForEach(p => Console.WriteLine(p.Title));
 
             // TASK: Combine async fetch with filtering/mapping
             var expensiveProducts = (await GetAllProductsAsync())
                 .Where(p => p.Price > 500)
                 .ToList();
-            Console.WriteLine("Expensive Products (>500):");
-            expensiveProducts.ForEach(p => Console.WriteLine(p.Title));
 
             // ================== Additional Exercises ==================
             // TASK: Find top products whose IDs match a user ID
-            var matchingIds = SampleData.products.Where(p => SampleData.users.Any(u => u.Id == p.Id)).ToList();
-            Console.WriteLine("Products matching user IDs:");
-            matchingIds.ForEach(p => Console.WriteLine($"{p.Title} - ID {p.Id}"));
+            var matchingIds = SampleData.products
+                .Where(p => SampleData.users.Any(u => u.Id == p.Id)).ToList();
 
-            // TASK: Map + filter users in CA state
-            var mappedFilteredUsers = SampleData.users
-                .Where(u => u.State == "CA")
-                .Select(u => new {u.Name, u.Country})
-                .ToList();
-            Console.WriteLine("Mapped + Filtered Users (CA):");
-            mappedFilteredUsers.ForEach(u => Console.WriteLine($"{u.Name} - {u.Country}"));
-
-            // ================== Utility / Placeholder ==================
-            // TASK: Demonstrate readonly / record usage
-            var ru = new ReadonlyUser(1, "Alice", "NY");
-            // ru.Name = "Bob"; // ❌ compilation error (readonly simulation)
-
-
+           
             // inner join 
             var innerJoin = from u in SampleData.users
                 join p in SampleData.products on u.Id equals p.Id
@@ -131,19 +103,17 @@ namespace Live
                 from p in g.DefaultIfEmpty()
                 select new {user = u.Name, title = p.Title};
         }
-
-        // Top-level record declaration inside namespace/class scope
-        public record ReadonlyUser(int Id, string Name, string State);
-    }
-
-    public class EmployeeCheck
-    {
-        public static void Filter()
+         
+        public static void SampleTemplates2()
         {
+            // --------------------------
+            // employee templates 
+             // sample grouping
             var res = SampleData.employees.GroupBy(d => new {d.Department, d.Name})
-                .Select(s => new {s.Key.Name, s.Key.Department})
+                .Select(s => new { name = s.Key.Name, dep = s.Key.Department, itms = s.ToList() })
                 .ToList();
 
+            // max salary by dep
             var maxDep = SampleData.employees.GroupBy(d => d.Department)
                 .Select(s => new {Dep = s.Key, Sal = s.Max(v => v.Salary)})
                 .ToList();
@@ -153,17 +123,12 @@ namespace Live
                 .Select(s => new {Dep = s.Key, Sal = s.Average(v => v.Salary)})
                 .OrderByDescending(o => o.Sal)
                 .FirstOrDefault();
-
-
+            
             // largest payed per dep
             var topEmployeesPerDept = SampleData.employees
                 .GroupBy(e => e.Department)
                 .Select(g => g.OrderByDescending(e => e.Salary).First())
                 .ToList();
-
-            var largestSlPerDep = SampleData.employees.GroupBy(g => g.Department)
-                .Select(s => s.OrderByDescending(v => v.Salary).First()).ToList();
-
 
             // avarage sal
             var emp = SampleData.employees
@@ -179,16 +144,38 @@ namespace Live
             var largest3PerDeps = SampleData.employees.GroupBy(g => g.Department)
                 .SelectMany(s => s.OrderByDescending(v => v.Salary).Take(3)).ToList();
 
-            var str = "aaabbcc";
-            var maxCnt = str.GroupBy(g => g).Select(s => new {ch = s.Key, cnt = s.Count(c => c != null)})
-                .OrderByDescending(o => o.cnt).FirstOrDefault();
-        }
-    }
+            var largest = SampleData.employees.GroupBy(g => g.Department)
+                .Select(s => s.OrderByDescending(k => k.Salary).First()).ToList();
 
-    public class DataCheck
-    {
-        public static void GO()
-        {
+            
+            // inner join 
+            var innerJoin = from u in SampleData.users
+                join p in SampleData.products on u.Id equals p.Id
+                select new {user = u.Name, product = p.Title};
+
+            // left join
+            var lefJOin = from u in SampleData.users
+                join p in SampleData.products on u.Id equals p.Id
+                    into g
+                from p in g.DefaultIfEmpty()
+                select new {user = u.Name, title = p.Title};
+
+            var str = "aaabbcc";
+            var maxCnt = str.GroupBy(g => g)
+                .Select(s => new {ch = s.Key, cnt = s.Count(c => c != null)})
+                .OrderByDescending(o => o.cnt).FirstOrDefault();
+            
+            
+            var gp3 = SampleData.employees
+                .GroupBy(p => new{p.Department})
+                .SelectMany(s => s, (g, c) => new {
+                     g.Key, c.Department
+                });
+
+            var gpM = SampleData.employees
+                .GroupBy(p => p.Department)
+                .Select(c => c.OrderByDescending(k => k.Salary).First());
+
             var lj1 =
                 from s1 in SampleData.Customers
                 join s2 in SampleData.Orders on s1.ExternalId equals s2.CustomerId
@@ -198,12 +185,14 @@ namespace Live
 
             var gp = SampleData.Orders
                 .GroupBy(p => p.CustomerId)
-                .SelectMany(s => s, (g, c) => new {k = g.Key, a = c.Amount})
+                .SelectMany(s => s, (g, c) 
+                    => new {k = g.Key, a = c.Amount})
                 .ToList();
 
             var gp2 = SampleData.Orders
                 .GroupBy(p => new {p.CustomerId, p.Status})
-                .SelectMany(s => s, (g, c) => new {cId = g.Key.CustomerId, status = g.Key.Status, a = c.Amount})
+                .SelectMany(s => s, (g, c) 
+                    => new {cId = g.Key.CustomerId, status = g.Key.Status, a = c.Amount})
                 .ToList();
 
 
@@ -229,6 +218,11 @@ namespace Live
                     into g
                 from s3 in g.DefaultIfEmpty()
                 select new {s1.Price, s3.Name};
+        }
+
+        public static void GO()
+        {
+            
         }
     }
 }
