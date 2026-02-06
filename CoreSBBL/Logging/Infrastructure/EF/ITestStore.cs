@@ -3,4 +3,6 @@
 public interface ITestStore
 {
     Task GO();
+
+    void SerilogSingCheck();
 }

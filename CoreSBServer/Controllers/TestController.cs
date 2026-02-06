@@ -31,6 +31,24 @@ namespace CoreSBServer.Controllers
             _testStore = testStore;
             _rabbit = rabbit;
         }
+        
+        [HttpGet]
+        [Route("test")]
+        public async Task<ActionResult> Test()
+        {
+            var tsk = await Task.FromResult("up and running !!");
+            var resp = await _http.GetAsync<string>("https://api.restful-api.dev/objects");
+            return Ok(resp);
+        }
+
+        [HttpGet]
+        [Route("checklog")]
+        public ActionResult CheckLog()
+        {
+            _testStore.SerilogSingCheck();
+            return Ok();
+        }
+        
         private async void DoWorkAsync()
         {
             await Task.Delay(100);
@@ -43,15 +61,6 @@ namespace CoreSBServer.Controllers
         {
             DoWorkAsync(); // async void
             return Ok();
-        }
-        
-        [HttpGet]
-        [Route("test")]
-        public async Task<ActionResult> Test()
-        {
-            var tsk = await Task.FromResult("up and running !!");
-            var resp = await _http.GetAsync<string>("https://api.restful-api.dev/objects");
-            return Ok(resp);
         }
         
         public class TestParallelReq
