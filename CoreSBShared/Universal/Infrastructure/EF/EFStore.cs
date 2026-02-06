@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using CoreSBShared.Universal.Infrastructure.EF.Stores;
 using CoreSBShared.Universal.Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -243,15 +244,18 @@ namespace CoreSBShared.Universal.Infrastructure.EF
 
 namespace CoreSBShared.Universal.Infrastructure.EF.Store
 {
-    public class EFStoreGeneric<TContext> 
-        : IEFStoreGeneric<TContext> where TContext : DbContext
+    // most flexible and direct usage
+    public class EFStoreGK<TContext> 
+        : IEFStoreGK<TContext> where TContext : DbContext
     {
         private readonly TContext _context;
 
-        public EFStoreGeneric()
+        public TContext GetContext() => _context;
+
+        public EFStoreGK()
         {}
 
-        public EFStoreGeneric(TContext context)
+        public EFStoreGK(TContext context)
         {
             _context = context;
         }
@@ -260,7 +264,7 @@ namespace CoreSBShared.Universal.Infrastructure.EF.Store
         {
             return await _context.Set<T>().FirstOrDefaultAsync(x => x.Id.Equals(id));
         }
-
+        
         public async Task<T?> GetByIdAsync<T>(int id) where T : class, ICoreDalGnInt
         {
             return await _context.Set<T>().FirstOrDefaultAsync(x => x.Id == id);
@@ -271,6 +275,7 @@ namespace CoreSBShared.Universal.Infrastructure.EF.Store
         }
 
 
+      
         public async Task<T> AddAsync<T>(T item) where T : class
         {
             await _context.Set<T>().AddAsync(item);
@@ -325,6 +330,83 @@ namespace CoreSBShared.Universal.Infrastructure.EF.Store
         public async Task<bool> DropDB()
         {
             return await _context.Database.EnsureDeletedAsync();
+        }
+    }
+}
+
+namespace CoreSBShared.Universal.Infrastructure.EF.Store
+{
+    public class EFStoreGeneric<TContext> : IEFStoreGeneric<TContext> where TContext : DbContext
+    {
+        private readonly TContext _dbContext;
+
+        public TContext GetContext() => _dbContext;
+
+        public EFStoreGeneric(TContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
+        public async Task<T> GetByIdAsync<T, K>(K id)
+            where T : class, ICoreDal<K>
+        {
+            return await _dbContext.Set<T>().FirstOrDefaultAsync(x => x.Id.Equals(id));
+        }
+
+        public async Task<T> AddAsync<T, K>(T item)
+            where T : class, ICoreDal<K>
+        {
+            await _dbContext.Set<T>().AddAsync(item);
+            await _dbContext.SaveChangesAsync();
+            return item;
+        }
+
+        public async Task<IEnumerable<T>> AddManyAsync<T, K>(IEnumerable<T> items)
+            where T : class, ICoreDal<K>
+        {
+            await _dbContext.Set<T>().AddRangeAsync(items);
+            await _dbContext.SaveChangesAsync();
+            return items;
+        }
+
+        public IQueryable<T> GetByFilter<T, K>(Expression<Func<T, bool>> expression)
+            where T : class, ICoreDal<K>
+        {
+            return _dbContext.Set<T>().Where(expression);
+        }
+
+        public async Task<T> UpdateAsync<T, K>(T item)
+            where T : class, ICoreDal<K>
+        {
+            _dbContext.Entry(item).State = EntityState.Modified;
+            await _dbContext.SaveChangesAsync();
+            return item;
+        }
+
+        public async Task<bool> DeleteAsync<T, K>(T item)
+            where T : class, ICoreDal<K>
+        {
+            _dbContext.Set<T>().Remove(item);
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<IEnumerable<T>> DeleteManyAsync<T, K>(IEnumerable<T> items)
+            where T : class, ICoreDal<K>
+        {
+            _dbContext.Set<T>().RemoveRange(items);
+            await _dbContext.SaveChangesAsync();
+            return items;
+        }
+
+        public void CreateDB()
+        {
+            _dbContext.Database.EnsureCreated();
+        }
+
+        public void DropDB()
+        {
+            _dbContext.Database.EnsureDeleted();
         }
     }
 }

@@ -20,6 +20,8 @@
 
         public static string ElasticSectionName => "Elastic";
         public static string ElasticConnetionsString => "ConnectionString";
+        
+        public static string RabbitSectionName => "Rabbit";
     }
 
     public class DefaultConfigurationValues

@@ -11,6 +11,12 @@ using CoreSBShared.Universal.Infrastructure.HTTP.MyApp.Services.Http;
 using CoreSBShared.Universal.Checkers.Threading;
 using Live;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using CoreSBBL.Logging.Services;
+using CoreSBShared.Universal.Infrastructure.HTTP.MyApp.Services.Http;
+using CoreSBShared.Universal.Infrastructure.Rabbit;
+using Microsoft.AspNetCore.Mvc;
+
 
 namespace CoreSBServer.Controllers
 {
@@ -18,9 +24,12 @@ namespace CoreSBServer.Controllers
     {
         private readonly IHttpService _http;
         private readonly ITestStore _testStore;
-        public TestController(IHttpService http, ITestStore testStore) {
+        private readonly IRabbitClient _rabbit;
+        
+        public TestController(IHttpService http, ITestStore testStore, IRabbitClient rabbit) {
             _http = http;
             _testStore = testStore;
+            _rabbit = rabbit;
         }
         private async void DoWorkAsync()
         {
@@ -71,6 +80,38 @@ namespace CoreSBServer.Controllers
             await _testStore.GO();
             return Ok();
         }
+    
+        [HttpGet]
+        [Route("Connected")]
+        public async Task<ActionResult> Connected()
+        {
+            try
+            {
+                return Ok($"Rabbit is connected : {_rabbit.IsConnected()}");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return Ok();
+        }
         
+        [HttpGet]
+        [Route("Channel")]
+        public async Task<ActionResult> Get()
+        {
+            try
+            {
+                var ch = await _rabbit.ChannelOpen();
+                var num = ch.ChannelNumber;
+                await _rabbit.ChannelClose(ch);
+                return Ok($"Channel : {num}");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return Ok();
+        }
     }
 }

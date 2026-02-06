@@ -13,6 +13,7 @@ using CoreSBShared.Universal.Infrastructure.Elastic;
 using CoreSBShared.Universal.Infrastructure.Interfaces;
 using CoreSBShared.Universal.Infrastructure.Models;
 using CoreSBShared.Universal.Infrastructure.Mongo;
+using Nest;
 
 namespace CoreSBBL.Logging.Services
 {
@@ -23,15 +24,17 @@ namespace CoreSBBL.Logging.Services
         private IMongoStore _mongoStore { get; }
         private IElasticStoreNest _elasticStore { get; }
         
-        public LoggingService(ILogsServiceGeneric logsServiceGeneric)
+        public LoggingService(ILogsServiceGeneric logsServiceGeneric, 
+            IElasticStoreNest elasticStore, IMongoStore mongoStore)
         {
             _logsServiceGeneric = logsServiceGeneric;
+            _elasticStore = elasticStore;
+            _mongoStore = mongoStore;
         }
         
         public async Task<LoggingResp> AddToAll(LoggingGenericBLAdd item)
         {
             await _logsServiceGeneric.CheckCreated();
-           
             
             var toAdd = new LoggingGenericBLAdd() { Message = item.Message, CreatedBy = "Default"};
             var resp = await _logsServiceGeneric.AddItem(toAdd);
@@ -43,6 +46,10 @@ namespace CoreSBBL.Logging.Services
             
             var ret = new LoggingGenericBLGetInt() {Id = resp.Id, Created = resp.Created, Modified = resp.Modified};
 
+            _elasticStore.CreateindexIfNotExists<LogsElk>("test_logs");
+            var elkIdx = await _elasticStore.AddAsyncElk(toAddGuid);
+                
+            var mongoIdx = await _mongoStore.AddAsync(toAddGuid);
             
             return new LoggingResp(){name = "Ids added", id1 = resp?.Id, id2 = secondItem?.Id, id3 = respGuid?.Id} ;
         }

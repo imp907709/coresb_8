@@ -6,6 +6,7 @@ using CoreSBBL.Logging.Models.TC.BL;
 using CoreSBBL.Logging.Models.TC.DAL;
 using CoreSBShared.Universal.Infrastructure.EF;
 using CoreSBShared.Universal.Infrastructure.EF.Store;
+using CoreSBShared.Universal.Infrastructure.EF.Stores;
 using CoreSBShared.Universal.Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -75,11 +76,11 @@ namespace CoreSBBL.Logging.Infrastructure.Generic
 
     public class LogsServiceGeneric : ILogsServiceGeneric
     {
-        private readonly IEFStoreGeneric<LogsContextGeneric> _storeEF;
-        private readonly IEFStoreGeneric<LogsContextGeneric2> _storeEF2;
+        private readonly IEFStoreGK<LogsContextGeneric> _storeEF;
+        private readonly IEFStoreGK<LogsContextGeneric2> _storeEF2;
         public LogsServiceGeneric(
-            IEFStoreGeneric<LogsContextGeneric> storeEF,
-            IEFStoreGeneric<LogsContextGeneric2> storeEF2
+            IEFStoreGK<LogsContextGeneric> storeEF,
+            IEFStoreGK<LogsContextGeneric2> storeEF2
             )
         {
             _storeEF = storeEF;
