@@ -89,7 +89,7 @@ namespace InfrastructureCheckers
     {
         public static void GO()
         {
-            LINQcheck.GO();
+            LINQcheckExtended.GO();
         }
     }
 
@@ -369,7 +369,7 @@ namespace InfrastructureCheckers
         public IEnumerable<Property> Property { get; set; }
     }
 
-    public class LINQcheck
+    public class LINQcheckExtended
     {
         public class Student
         {

@@ -9,12 +9,7 @@ namespace Live
     {
         // Top-level record declaration inside namespace/class scope
         public record ReadonlyUser(int Id, string Name, string State);
-    }
 
-   
-
-    public class DataCheck
-    {
         public static async Task SampleTemplates()
         {
             // ================== Sorting ==================
@@ -92,20 +87,18 @@ namespace Live
 
            
             // inner join 
-            var innerJoin = from u in SampleData.users
+            var innerJoinTwo = from u in SampleData.users
                 join p in SampleData.products on u.Id equals p.Id
                 select new {user = u.Name, product = p.Title};
 
             // left join
-            var lefJOin = from u in SampleData.users
+            var leftJoinTwo = from u in SampleData.users
                 join p in SampleData.products on u.Id equals p.Id
                     into g
                 from p in g.DefaultIfEmpty()
                 select new {user = u.Name, title = p.Title};
-        }
-         
-        public static void SampleTemplates2()
-        {
+       
+            
             // --------------------------
             // employee templates 
              // sample grouping
@@ -222,7 +215,39 @@ namespace Live
 
         public static void GO()
         {
-            
+            // avarage
+            // AVG: hr 57500 it 756666 fin 67666
+            var avgbyDep = SampleData.employees
+                .GroupBy(g => new {dep = g.Department})
+                .Select(s => new {Department = s.Key.dep, avg = s.Average(c => c.Salary)});
+
+            // max in group
+            // max by cutId : 101-300, 103-270, 104-180
+            var maxBuCustom = SampleData.Orders.GroupBy(s => s.CustomerId)
+                .Select(c => c.OrderByDescending(s => s.Amount).First());
+
+            var maxCustSum = SampleData.Orders.GroupBy(g => new {Cust = g.CustomerId})
+                .Select(c => new {Cust = c.Key.Cust, Sum = c.Sum(v => v.Amount)})
+                .OrderByDescending(o => o.Sum).First();
+
+            // left join 
+            // group by sum
+            var lj = 
+                from s1 in SampleData.Customers
+                    join s2 in SampleData.Orders 
+                        on s1.ExternalId equals s2.CustomerId into j
+                        from s3 in j.DefaultIfEmpty()
+                group s3 by new {s1.ExternalId} into g
+                select new { g.Key, amt = g.Sum(c=> c?.Amount ?? 0)};
+
+            var gpJn = SampleData.Customers
+                .Join(SampleData.Orders, l => l.ExternalId, r => r.CustomerId,
+                    (l, r) => new {l.ExternalId, l.Name, r.Amount})
+                .GroupBy(g => new {g.ExternalId, g.Name})
+                .Select(s => new {
+                    Gp = s.Key.Name, amt = s.Sum(c=>c?.Amount ?? 0)
+                });
+
         }
     }
 }

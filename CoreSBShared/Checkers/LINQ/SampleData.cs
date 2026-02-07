@@ -42,17 +42,24 @@ namespace CoreSBShared.Checkers.LINQ
     
     public static class SampleData
     {
+        
+        // max by cutId : 101-300, 103-270, 104-180
+        // max sum by cust of all : 103 720
         public static List<Order> Orders = new List<Order>
         {
             new Order { Id = 1, CustomerId = 101, Amount = 150.5m, Status = "Open" },
             new Order { Id = 2, CustomerId = 102, Amount = null, Status = "Closed" },
             new Order { Id = 3, CustomerId = 101, Amount = 75m, Status = null },
             new Order { Id = 4, CustomerId = 103, Amount = 200m, Status = "Open" },
-            new Order { Id = 5, CustomerId = null, Amount = 50m, Status = "Open" },
-            new Order { Id = 6, CustomerId = 104, Amount = 120m, Status = "Closed" },
-            new Order { Id = 7, CustomerId = 102, Amount = null, Status = null },
-            new Order { Id = 8, CustomerId = 101, Amount = 300m, Status = "Open" },
-            new Order { Id = 9, CustomerId = 105, Amount = 80m, Status = "Closed" }
+            new Order { Id = 5, CustomerId = 103, Amount = 250m, Status = "Open" },
+            new Order { Id = 6, CustomerId = 103, Amount = 270m, Status = "Closed" },
+            new Order { Id = 7, CustomerId = null, Amount = 50m, Status = "Open" },
+            new Order { Id = 8, CustomerId = 104, Amount = 120m, Status = "Closed" },
+            new Order { Id = 9, CustomerId = 104, Amount = 180m, Status = "Closed" },
+            new Order { Id = 10, CustomerId = 102, Amount = null, Status = null },
+            new Order { Id = 11, CustomerId = 101, Amount = 300m, Status = "Open" },
+            new Order { Id = 12, CustomerId = 105, Amount = 80m, Status = "Closed" },
+            new Order { Id = 13, CustomerId = 105, Amount = 60m, Status = "Open" }
         };
 
         public static List<Customer> Customers = new List<Customer>
@@ -61,9 +68,11 @@ namespace CoreSBShared.Checkers.LINQ
             new Customer { ExternalId = 102, Name = "Bob", Region = "West" },
             new Customer { ExternalId = 103, Name = "Charlie", Region = null },
             new Customer { ExternalId = 104, Name = "Diana", Region = "North" },
-            new Customer { ExternalId = 105, Name = "Evan", Region = "South" }
+            new Customer { ExternalId = 105, Name = "Evan", Region = "South" },
+            new Customer { ExternalId = 106, Name = "Dirk", Region = "South" }
         };
         
+        // AVG: hr 57500 it 756666 fin 67666
         // Example data
         public static List<Employee>  employees = new List<Employee> {
             new Employee { Id = 1, Name = "Alice", Department = "HR", Salary = 55000 },
