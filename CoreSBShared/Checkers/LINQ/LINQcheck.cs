@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Runtime.Intrinsics.X86;
 using CoreSBShared.Checkers.LINQ;
 using InfrastructureCheckers.Vit;
 using Microsoft.EntityFrameworkCore;
@@ -7,8 +8,6 @@ namespace Live
 {
     public class LINQcheck
     {
-        // Top-level record declaration inside namespace/class scope
-        public record ReadonlyUser(int Id, string Name, string State);
 
         public static async Task SampleTemplates()
         {
@@ -213,8 +212,17 @@ namespace Live
                 select new {s1.Price, s3.Name};
         }
 
-        public static void GO()
+        // sample data empl orders check
+        public static void SampleDataChecks()
         {
+            
+            // max sal by dep
+            var sumBygp = SampleData.employees.GroupBy(g => g.Department)
+                .Select(s => new {dep = s.Key, amt = s.Max(c => c?.Salary ?? 0)});
+            
+            var largSalEmplWithDep = SampleData.employees.GroupBy(g=> g.Department)
+                .Select(c=>c.OrderByDescending(o=>o.Salary).First());
+            
             // avarage
             // AVG: hr 57500 it 756666 fin 67666
             var avgbyDep = SampleData.employees
@@ -247,7 +255,28 @@ namespace Live
                 .Select(s => new {
                     Gp = s.Key.Name, amt = s.Sum(c=>c?.Amount ?? 0)
                 });
+            
+            
+            var total = SampleData.employees.Count();
+            var ordrd = SampleData.employees.OrderByDescending(s => s.Salary);
+            var percentileGeneral = SampleData.employees.Select(s => new {
+                s.Name, s.Salary, perc = (double)ordrd.Count(c => c.Salary < s.Salary) / total * 100
+            }).OrderByDescending(c=>c.perc).ToList();
+            
+            var percentileByDepartment = SampleData.employees.Select(s => new {
+                s.Name, s.Salary, s.Department, perc = (double)ordrd.Where(c=>c.Department == s.Department)
+                                                           .Count(c => c.Salary < s.Salary) 
+                                                       / SampleData.employees.Where(c=>c.Department == s.Department).Count()
+                                                       * 100
+                
+            }).OrderByDescending(c=>c.Department).ToList();
+            
+        }
 
+
+        public static void GO()
+        {
+            
         }
     }
 }
