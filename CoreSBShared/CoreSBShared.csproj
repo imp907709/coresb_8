@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="AutoFixture" Version="5.0.0-preview0012" />
+        <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
         <PackageReference Include="Elastic.Clients.Elasticsearch" Version="8.1.1" />
         <PackageReference Include="Elasticsearch.Net" Version="7.17.5" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.5" />

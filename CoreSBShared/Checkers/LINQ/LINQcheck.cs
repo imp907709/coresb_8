@@ -1,8 +1,10 @@
 ﻿using System.Linq;
 using System.Runtime.Intrinsics.X86;
 using CoreSBShared.Checkers.LINQ;
+using InfrastructureCheckers;
 using InfrastructureCheckers.Vit;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver.Linq;
 
 namespace Live
 {
@@ -265,18 +267,36 @@ namespace Live
             
             var percentileByDepartment = SampleData.employees.Select(s => new {
                 s.Name, s.Salary, s.Department, perc = (double)ordrd.Where(c=>c.Department == s.Department)
-                                                           .Count(c => c.Salary < s.Salary) 
-                                                       / SampleData.employees.Where(c=>c.Department == s.Department).Count()
-                                                       * 100
+                   .Count(c => c.Salary < s.Salary) 
+               / SampleData.employees.Where(c=>c.Department == s.Department).Count()
+               * 100
                 
             }).OrderByDescending(c=>c.Department).ToList();
             
+            // group by select selectmany - unwrap
+            var emp = SampleData.employees
+                .GroupBy(g => new {g.Department, g.Name})
+                .Select(s => new {
+                        s.Key.Department, s.Key.Name, 
+                        sal = s.Select(c => new {c.Salary, c.Id})
+                })
+                .SelectMany(c=> c.sal, 
+                    (l,r) => new { l.Department,l.Name, r.Salary,r.Id })
+                .ToList();
+
+           
         }
 
 
         public static void GO()
         {
-            
+            var str = "aaaabbbcceeeeeeffff";
+
+            var topFreq = str.GroupBy(c => c)
+                .Select(s => new {s.Key, cnt = s.Count(x => true)})
+                .OrderByDescending(c => c.cnt).Take(3).ToList();
+
+            var charMap = new HashMaps();
         }
     }
 }

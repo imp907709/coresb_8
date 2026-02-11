@@ -156,7 +156,6 @@ namespace InfrastructureCheckers
 	
             return set;
         }
-
     }
 
     public class WithLinq

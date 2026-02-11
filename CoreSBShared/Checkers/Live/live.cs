@@ -17,9 +17,15 @@ namespace Live
     {
         public static async Task GO()
         {
+            var i = 1;
+            i += i++ + ++i;
+           
             LINQcheck.GO();
-            
+
             HashConversionsIGS.GO();
+           
         }
+
     }
+    
 }
