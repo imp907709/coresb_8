@@ -1,10 +1,15 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Intrinsics.X86;
+using System.Threading.Tasks;
 using CoreSBShared.Checkers.LINQ;
 using InfrastructureCheckers;
 using InfrastructureCheckers.Vit;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver.Linq;
+using Nest;
 
 namespace Live
 {
@@ -199,10 +204,12 @@ namespace Live
 
             var min = 15;
             var max = 27;
-            _context.prices.Include(s => s.Price)
-                .GroupBy(c => c.Product)
-                .Select(s => s.OrderByDescending(c => c.CreatedDate).First())
-                .Where(s => s.Price >= min && s.Price <= max);
+            _context.prices
+                .Where(p => p.Price >= min && p.Price <= max)
+                .GroupBy(p => p.Product)
+                .Select(g => g
+                    .OrderByDescending(p => p.CreatedDate)
+                .First());
 
             var prices = _context.prices.ToList();
             var products = _context.products.ToList();
@@ -258,45 +265,128 @@ namespace Live
                     Gp = s.Key.Name, amt = s.Sum(c=>c?.Amount ?? 0)
                 });
             
-            
+            // Percentiles N ^ 2
             var total = SampleData.employees.Count();
             var ordrd = SampleData.employees.OrderByDescending(s => s.Salary);
             var percentileGeneral = SampleData.employees.Select(s => new {
-                s.Name, s.Salary, perc = (double)ordrd.Count(c => c.Salary < s.Salary) / total * 100
+                s.Name, s.Salary, 
+                perc = (double)ordrd.Count(c => c.Salary < s.Salary) / total * 100
             }).OrderByDescending(c=>c.perc).ToList();
             
             var percentileByDepartment = SampleData.employees.Select(s => new {
-                s.Name, s.Salary, s.Department, perc = (double)ordrd.Where(c=>c.Department == s.Department)
+                s.Name, s.Salary, s.Department,
+                
+                perc = (double)ordrd.Where(c=>c.Department == s.Department)
                    .Count(c => c.Salary < s.Salary) 
                / SampleData.employees.Where(c=>c.Department == s.Department).Count()
                * 100
                 
             }).OrderByDescending(c=>c.Department).ToList();
             
-            // group by select selectmany - unwrap
+            // Percentils N
+            var percN = SampleData.employees.GroupBy(g => g.Department)
+                .SelectMany(s =>
+                {
+                    var total = s.Count();
+                    var ordered = s.OrderByDescending(c => c.Salary);
+
+                    var res = ordered
+                        .Select(c=> new {
+                            dep = c.Department,
+                            anme = c.Name,
+                            perc = c.Salary * 100 /  total,
+                        });
+
+                    return res;
+                });
+            
+            // percentile N 
+            var percNp = SampleData.employees.GroupBy(g => g.Department)
+                .SelectMany(s => {
+                    var total = s.Count();
+                    var ordered = s.OrderByDescending(c => c.Salary);
+
+                    var res = ordered
+                        .Select((c,i)=> new {
+                            dep = c.Department,
+                            anme = c.Name,
+                            perc = i * 100 / total,
+                        });
+
+                    return res;
+                });
+            
+            // group by select many - unwrap
             var emp = SampleData.employees
                 .GroupBy(g => new {g.Department, g.Name})
                 .Select(s => new {
-                        s.Key.Department, s.Key.Name, 
-                        sal = s.Select(c => new {c.Salary, c.Id})
+                    s.Key.Department, s.Key.Name, 
+                    sal = s.Select(c => new {c.Salary, c.Id})
                 })
                 .SelectMany(c=> c.sal, 
                     (l,r) => new { l.Department,l.Name, r.Salary,r.Id })
                 .ToList();
-
-           
+  
         }
 
+        
+        public class PersToEq : IEquatable<PersToEq>
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
 
+            public PersToEq()
+            {
+
+            }
+
+            public bool Equals(PersToEq? p)
+            {
+                if (ReferenceEquals(p, this)) return true;
+                if (p == null) return false;
+                
+                return p.Id == Id && p.Name == Name;
+            }
+
+            public override bool Equals(object? o) => Equals(o as PersToEq);
+
+            public override int GetHashCode() => HashCode.Combine(Id, Name);
+            
+            public static bool operator == (PersToEq? a, PersToEq? b ) => Equals(a, b);
+            public static bool operator !=  (PersToEq? a, PersToEq? b) => !Equals(a, b);
+        } 
+        
         public static void GO()
         {
-            var str = "aaaabbbcceeeeeeffff";
+            var chrs = "hhhsdddggssshhdhshjdajdjjsdhad";
+            var topMostFreq = chrs.GroupBy(g=>g)
+                .Select(s=> new
+                {
+                    cnt = s.Count(),
+                    ch = s.Key
+                }).OrderByDescending(g=>g.cnt).Take(3);
 
-            var topFreq = str.GroupBy(c => c)
-                .Select(s => new {s.Key, cnt = s.Count(x => true)})
-                .OrderByDescending(c => c.cnt).Take(3).ToList();
+            var topN = 3;
+            var largest = new SortedSet<(int,char)>();
+            var accum = new Dictionary<char,int>();
+            foreach (var ch in chrs)
+            {
+                if (!accum.TryGetValue(ch, out var val))
+                    val = 0;
+                accum[ch] = val + 1;
 
-            var charMap = new HashMaps();
+                if (largest.Count < topN)
+                {
+                    largest.Add((val, ch));
+                }
+                else
+                {
+                    if (largest.Min >= val)
+                        break;
+                }
+                
+                
+            }
         }
     }
 }

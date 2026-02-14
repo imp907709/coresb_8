@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Generic;
+
 namespace CoreSBShared.Checkers.LINQ
 {
     // ================== Models ==================

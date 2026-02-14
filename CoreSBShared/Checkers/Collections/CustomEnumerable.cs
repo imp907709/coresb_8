@@ -164,8 +164,8 @@ namespace InfrastructureCheckers.Collections
 
         public bool Equals(PersonToEqual? p)
         {
-            if (p is null)
-                return false;
+            if (ReferenceEquals(p, this)) return true;
+            if (p == null) return false;
 
             return p.Name == Name && p.SecondName == SecondName;
         }
@@ -180,5 +180,29 @@ namespace InfrastructureCheckers.Collections
             !Equals(personLeft, personRight);
 
     }
+    
+    
+    public class PersonToComparable : IComparable<PersonToComparable> {
+        
+        public int Id { get; set; }
+        public string Name { get; set; }
+        
+        public PersonToComparable(){}
+
+        public int CompareTo(PersonToComparable? p)
+        {
+            if (p == null) return 1;
+
+            if (p.Equals(this)) return 0;
+            
+            if (p.Id != Id) return Id.CompareTo(p.Id);
+
+            if(p.Name != Name) return string.CompareOrdinal(p.Name, Name); 
+            
+            return -1;
+        }
+    }
+    
+    
     
 }
