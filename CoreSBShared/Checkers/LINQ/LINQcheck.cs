@@ -359,34 +359,7 @@ namespace Live
         public static void GO()
         {
             var chrs = "hhhsdddggssshhdhshjdajdjjsdhad";
-            var topMostFreq = chrs.GroupBy(g=>g)
-                .Select(s=> new
-                {
-                    cnt = s.Count(),
-                    ch = s.Key
-                }).OrderByDescending(g=>g.cnt).Take(3);
-
-            var topN = 3;
-            var largest = new SortedSet<(int,char)>();
-            var accum = new Dictionary<char,int>();
-            foreach (var ch in chrs)
-            {
-                if (!accum.TryGetValue(ch, out var val))
-                    val = 0;
-                accum[ch] = val + 1;
-
-                if (largest.Count < topN)
-                {
-                    largest.Add((val, ch));
-                }
-                else
-                {
-                    if (largest.Min >= val)
-                        break;
-                }
-                
-                
-            }
+           
         }
     }
 }

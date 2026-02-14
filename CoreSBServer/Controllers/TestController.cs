@@ -26,11 +26,44 @@ namespace CoreSBServer.Controllers
         private readonly ITestStore _testStore;
         private readonly IRabbitClient _rabbit;
         
+        private static CancellationTokenSource _cts;
+        
         public TestController(IHttpService http, ITestStore testStore, IRabbitClient rabbit) {
             _http = http;
             _testStore = testStore;
             _rabbit = rabbit;
         }
+
+        [HttpGet]
+        [Route("runstart")]
+        public async Task<IActionResult> RunStart()
+        {
+            _cts = new CancellationTokenSource();
+            var hs = _cts?.Token.GetHashCode();
+            Console.WriteLine("Start token: " + _cts?.Token.GetHashCode());
+
+            try
+            {
+                await Task.Delay(15000, _cts.Token);
+            }
+            catch (TaskCanceledException)
+            {
+                return Ok($"cancelled with {hs}");
+            }
+            return Ok($"finished with {hs}");
+        }
+        [HttpGet]
+        [Route("runcancel")]
+        public IActionResult RunCancel()
+        {
+            var hs = _cts?.Token.GetHashCode();
+            Console.WriteLine("Cancel token: " + _cts?.Token.GetHashCode());
+            
+            _cts.Cancel();
+            return Ok($"cancelled with {hs}");
+        }
+        
+        
         
         [HttpGet]
         [Route("test")]

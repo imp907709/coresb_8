@@ -1,10 +1,14 @@
-﻿namespace CoreSBShared.Universal.Checkers.Threading
+﻿using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace CoreSBShared.Universal.Checkers.Threading
 {
     public class TaskRunCheck
     {
         private async Task ProcessCards(List<string> cards)
         {
-            using var semaphore = new SemaphoreSlim(100);
 
             var tasks = new List<Task<HttpResponseMessage>>();
 
