@@ -23,11 +23,13 @@ namespace InfrastructureCheckers.IGS
 
         public static void Blitz()
         {
-            var username  = "testhash004";
+            var username  = "testTwoZero";
             var password  = "123456";
-            var date      = "05.09.2029";
+            var date      = "28.01.2026";
             var hashSalt  = "AgEnTporTAL";
             var hashAis = HashAis(username, date, password);
+            
+            var hs3 = Hash3("1234567");
             
             // ais hash 
             // B786F71DB055D6E05843A7BFE7436CE2638932B9
@@ -62,6 +64,12 @@ namespace InfrastructureCheckers.IGS
             var sha1Bytes = SHA1.HashData(sha1Input);
             var hash2 = Convert.ToHexString(sha1Bytes).ToLowerInvariant();
             return hash2;
+        }
+
+        public static string Hash3(string password)
+        {
+            var hash = BCrypt.Net.BCrypt.HashPassword(password, workFactor: 12);
+            return hash;
         }
         
         public static void GO()
