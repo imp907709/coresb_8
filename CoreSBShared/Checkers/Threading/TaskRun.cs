@@ -2,11 +2,46 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using InfrastructureCheckers;
 
 namespace CoreSBShared.Universal.Checkers.Threading
 {
     public class TaskRunCheck
     {
+        public static async void GO()
+        {
+            var t = new TaskRunCheck();
+            // t.RunWithTaskSync();
+            await t.RunWithTaskAsync();
+        }
+        
+        
+        public double RunCPUintense()
+        {
+            int n = (int)(100000 / 2.5);
+            var res = CpuHeavy.WorkQuadratic(n);
+            return res;
+        }
+
+        public void RunWithTaskSync()
+        {
+            var t = Task.Run(() => {
+                RunCPUintense();
+            });
+
+            t.Wait();
+        }
+
+        public async Task<double> RunWithTaskAsync()
+        {
+            var t = Task.Run(() =>
+            {
+                return RunCPUintense();
+            });
+
+            return await t;
+        }
+        
         private async Task ProcessCards(List<string> cards)
         {
 

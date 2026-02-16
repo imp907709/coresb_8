@@ -20,11 +20,12 @@ namespace Live
             var i = 1;
             i += i++ + ++i;
 
+            TaskRunCheck.GO();
+            
             LINQcheck.GO();
 
             HashConversionsIGS.GO();
 
         }
     }
-
 }
