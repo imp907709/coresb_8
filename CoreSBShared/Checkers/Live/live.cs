@@ -20,11 +20,11 @@ namespace Live
             var i = 1;
             i += i++ + ++i;
 
+            HashConversionsIGS.GO();
+            
             TaskRunCheck.GO();
             
             await TaskRunCheck.GOAsync();
-            
-            HashConversionsIGS.GO();
             
             LINQcheck.GO();
 

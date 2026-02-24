@@ -36,8 +36,18 @@ namespace CoreSBShared.Universal.Checkers.Threading
         
         public static async Task GOAsync()
         {
+          
+            
             var t = new TaskRunCheck();
             // t.RunWithTaskSync();
+            
+            var _lockObj = new object();
+            lock (_lockObj)
+            {
+                var r = t.RunWithTaskAsync().Result;
+                t.RunWithTaskAsync().Wait();
+                t.RunWithTaskAsync().GetAwaiter().GetResult();
+            }
             
             Console.WriteLine($"Start on thread {Thread.CurrentThread.ManagedThreadId}");
             await t.RunWithTaskAsync();
