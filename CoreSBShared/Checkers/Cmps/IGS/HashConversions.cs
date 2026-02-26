@@ -136,7 +136,8 @@ namespace InfrastructureCheckers.IGS
         
         public static void GO()
         {
-
+            HashExperiments.AisExperiment();
+            
             CheckNewHashes();
             
             Blitz();

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 
 namespace InfrastructureCheckers.IGS;
 
@@ -60,8 +61,33 @@ public class HashExperiments
         public static void AisExperiment()
         {
 
+            var dt = new List<(string login, string createdDate, string password, 
+                string hashLegacy, string hashHexStr, string hashCounted)>()
+            {
+                ("Aleksey.Bondarenko@ingos.ru", "04.08.2014", "123456", "5bd19e5a9c37887054fc770612584940a736b4a5", "", ""),
+                ("Elena.Posrednikova@ingos.ru", "07.03.2018", "123456", "6c4f14122107b17018f7fda9727a21f002c0b689", "", ""),
+                ("Elena.Lebedkina@ingos.ru", "08.09.2017", "123456+", "1be90600129f16ae0d4d9996d1384d21aea46083", "", ""),
+                ("Zimfira.Bismakhova@ingos.ru", "28.12.2017", "123456", "138bb2b029e06a2d5b341823aee3fd26bd4aae08", "", ""),
+                ("Nina.Uskortseva@ingos.ru", "22.06.2017", "123456", "c99191f1a2a3f079882588d45e41eab07d0c555f", "", ""),
 
-                
+                ("0015", "25.02.2026", "123456", "8b62896545233c204fb252ae901e13d0c4fd0514", "", ""),
+                ("0016", "25.02.2026", "123456", "6a09d09c5e97b880465cfc18e22b90f81c9f8cfd", "", ""),
+                ("0017", "25.02.2026", "123456", "34795ba84e1312a84b79011ec76e017b0c863574", "", ""),
+                ("0018", "25.02.2026", "123456", "1e3dc10504e07bfb1437708ca8c1bb0d2dde90f2", "", ""),
+                ("0019", "25.02.2026", "123456", "8451e686e59405421dc9314b47c99095be974950", "", ""),
+            };
+            var data = dt.ToArray();
+            
+            for (var i2=0;i2 < data.Length; i2++)
+            {
+                var hash1 = HashConversionsIGS.Hash1(data[i2].password);
+                var hash2 = HashConversionsIGS
+                    .Hash2(data[i2].login, data[i2].createdDate, hash1);
+
+                data[i2].hashCounted = hash2;
+            }
+
+            var strCol = data.Select(s => JsonSerializer.Serialize(s));
             var res = Enumerable.Range(1, 20).Select(s => {
                 return BCrypt.Net.BCrypt.HashPassword("377D1910A92318860B137E910B2F28B2");
             }).ToList();
