@@ -36,7 +36,6 @@ namespace CoreSBShared.Universal.Checkers.Threading
         
         public static async Task GOAsync()
         {
-          
             
             var t = new TaskRunCheck();
             // t.RunWithTaskSync();

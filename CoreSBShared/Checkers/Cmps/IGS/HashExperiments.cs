@@ -87,6 +87,13 @@ public class HashExperiments
                 data[i2].hashCounted = hash2;
             }
 
+            var username ="Svetlana.Musatova@voronezh.ingos.ru";
+            var date = "08.09.2014";
+            var pass = "Test123456";
+
+            var hash1_ = HashConversionsIGS.Hash1(pass);
+            var hash2_ = HashConversionsIGS.Hash2(username, date, hash1_);
+            
             var strCol = data.Select(s => JsonSerializer.Serialize(s));
             var res = Enumerable.Range(1, 20).Select(s => {
                 return BCrypt.Net.BCrypt.HashPassword("377D1910A92318860B137E910B2F28B2");
