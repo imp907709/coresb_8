@@ -8,7 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using CoreSBShared.Universal.Checkers.Threading;
-
+using InfrastructureCheckers.Collections;
 using InfrastructureCheckers.IGS;
 
 namespace Live
@@ -27,7 +27,8 @@ namespace Live
             await TaskRunCheck.GOAsync();
             
             LINQcheck.GO();
-
+            
+            CustomEnumerableCheck.GO();
         }
     }
 }

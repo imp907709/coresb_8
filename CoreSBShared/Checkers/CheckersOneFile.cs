@@ -5210,7 +5210,7 @@ public static bool bracketsCheck(string input)
     
     
     
-    //tire tree first version
+    // trie tree first version
 
     public class TrieNode
     {

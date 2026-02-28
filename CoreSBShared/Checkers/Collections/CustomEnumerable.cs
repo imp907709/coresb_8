@@ -22,6 +22,26 @@ namespace InfrastructureCheckers.Collections
             Console.WriteLine($@"Result arr: {String.Join(',', outArr)}");
         }
     }
+    
+    // Analyze the provided C# code implementing an interface (e.g., IEquatable<T>, IComparable<T>, IEnumerator<T>, IDisposable).
+    //
+    // Rules for review:
+    //
+    // 1. Focus only on conceptual mechanics required by the interface:
+    // 2. Ignore null, argument range, or runtime exception checks.
+    // 3. Ignore performance, threading, or memory optimizations.
+    // 4. Highlight missing auxiliary contracts when relevant and provide minimal valid implementation
+    // in given style
+    // 5. Output should be one concise line: 
+    // - OK → mechanics correct and flow would compile/run conceptually.
+    // - NOT OK → broken mechanics.
+    // - Or a short note highlighting potential missing interface contract elements.
+    //
+    // Example output:
+    // - "OK → mechanics correct; consider adding GetHashCode() and ==/!= operators."
+    // - "Works mechanically but Reset() not implemented."
+    // - "NOT OK → MoveNext does not update Current correctly."
+
 
     public class CustomEnumerable<T> : IEnumerable<T>
     {
@@ -147,6 +167,8 @@ namespace InfrastructureCheckers.Collections
         }
 
         public T? Current => _current;
+        
+        // for non generic enumerator
         object IEnumerator.Current => Current;
 
         public void Dispose()
@@ -170,9 +192,15 @@ namespace InfrastructureCheckers.Collections
             return p.Name == Name && p.SecondName == SecondName;
         }
 
+        // bridge between IEquatable<T> and the base object.Equals
+        // used in non generic collections like arraylist or hashtable - APIs expect object not T
         public override bool Equals(object? o) => Equals(o as PersonToEqual);
+
+        // crucial for usages in hash based collections (dictionary, hashset, concurrentdictionary)
+        // also LINQ distinct and group by 
         public override int GetHashCode() => HashCode.Combine(Name, SecondName);
 
+        // crucial for usage with ==
         public static bool operator == (PersonToEqual? personLeft, PersonToEqual? personRight) =>
             Equals(personLeft, personRight);
 
@@ -201,6 +229,21 @@ namespace InfrastructureCheckers.Collections
             
             return -1;
         }
+        
+        public static int operator >(PersonToComparable a, PersonToComparable b) => a.CompareTo(b);
+        public static int operator <(PersonToComparable a, PersonToComparable b) => a.CompareTo(b);
+        public static int operator >=(PersonToComparable a, PersonToComparable b) => a.CompareTo(b);
+        public static int operator <=(PersonToComparable a, PersonToComparable b) => a.CompareTo(b);
+        
+        
+        // equatable part
+        public bool Equals(PersonToComparable? p) => Equals(p);
+        public bool Equals(object? o) => Equals(o as PersonToComparable);
+
+        public override int GetHashCode() => HashCode.Combine(Id, Name);
+        
+        public static bool operator ==(PersonToComparable a, PersonToComparable b) => Equals(a, b);
+        public static bool operator !=(PersonToComparable a, PersonToComparable b) => !Equals(a, b);
     }
     
     

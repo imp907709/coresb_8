@@ -25,7 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Checkers\Cmps\" />
+        <Folder Include="Checkers\Companies\" />
         <Folder Include="Properties\Domain" />
     </ItemGroup>
 
