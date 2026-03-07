@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,15 +21,16 @@ namespace Live
             var i = 1;
             i += i++ + ++i;
 
-            HashConversionsIGS.GO();
-            
-            TaskRunCheck.GO();
-            
-            await TaskRunCheck.GOAsync();
-            
             LINQcheck.GO();
-            
+
+            HashConversionsIGS.GO();
+
+            TaskRunCheck.GO();
+
+            await TaskRunCheck.GOAsync();
+
             CustomEnumerableCheck.GO();
         }
     }
+    
 }

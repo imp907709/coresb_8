@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -57,10 +58,43 @@ public class HashExperiments
             var asumedBlitsHex = Convert.ToHexString(assumedBlitzHash);
             return asumedBlitsHex;
         }
+        
+        
+        
+        
+        
+        
+        public static void TestBycriptHashingTimes()
+        {
+            var rnd = new Random();
+            var stringsToHash = new List<string>();
+            var bound = 10;
+            for (int i = 0; i <= bound; i++)
+            {
+                var v = rnd.Next(0, 100000);
+                stringsToHash.Add(v.ToString());
+            }
 
+            var sw = new Stopwatch();
+
+            var stringToHash = "somestringtohash";
+            var peper = "somepeper";
+            var val = stringsToHash + peper;
+
+            sw.Start();
+            var hash1 = BCrypt.Net.BCrypt.HashPassword(val, workFactor: 12);
+            var t1 = sw.ElapsedMilliseconds;
+            
+            var t21  = sw.ElapsedMilliseconds;
+            var valid = BCrypt.Net.BCrypt.Verify(val, hash1);
+            var t22 = sw.ElapsedMilliseconds - t21;
+            
+        }
+        
         public static void AisExperiment()
         {
-
+            TestBycriptHashingTimes();
+            
             var dt = new List<(string login, string createdDate, string password, 
                 string hashLegacy, string hashHexStr, string hashCounted)>()
             {
@@ -86,6 +120,47 @@ public class HashExperiments
 
                 data[i2].hashCounted = hash2;
             }
+
+            var rnd = new Random();
+            var stringsToHash = new List<string>();
+            var bound = 10;
+            for (int i = 0; i <= bound; i++)
+            {
+                var v = rnd.Next(0, 100000);
+                stringsToHash.Add(v.ToString());
+            }
+            var stat = new List<(int id, string msg, string val, string hash, string elapsed)>();
+
+            var hashesCounted = new List<string>();
+
+            var s0 = new Stopwatch();
+            s0.Start();
+            foreach (var v in stringsToHash)
+            {
+                var hs = BCrypt.Net.BCrypt.HashPassword(v, workFactor: 12);
+                hashesCounted.Add(hs);
+                
+                stat.Add(new (0,"Hash with 12",v, hs, s0.ElapsedMilliseconds.ToString()));
+            }
+
+            var t1 = s0.Elapsed;
+            hashesCounted = new List<string>();
+            foreach (var v in stringsToHash)
+            {
+                var hs = BCrypt.Net.BCrypt.HashPassword(v, workFactor: 10);
+                hashesCounted.Add(hs);
+                
+                stat.Add(new (0,"Hash with 10",v, hs, s0.ElapsedMilliseconds.ToString()));
+            }
+
+            var validStat = new List<(int id, string msg, string val, string hash, string elapsed)>();
+            foreach (var h in stat)
+            {
+                var valid = BCrypt.Net.BCrypt.Verify(h.val, h.hash);
+                validStat.Add(new (0,"Verify", h.val,h.hash,s0.ElapsedMilliseconds.ToString()));
+            }
+            var t2 = s0.Elapsed;
+            s0.Stop();
 
             var username ="Svetlana.Musatova@voronezh.ingos.ru";
             var date = "08.09.2014";
@@ -266,4 +341,5 @@ public class HashExperiments
             
             var url = ConstantsCheckers.testApiURl2;
         }
+
 }

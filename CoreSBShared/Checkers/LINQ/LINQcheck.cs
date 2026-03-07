@@ -17,7 +17,7 @@ namespace Live
 {
     public class LINQcheck
     {
-
+        // template query examples
         public static async Task SampleTemplates()
         {
             // ================== Sorting ==================
@@ -226,7 +226,6 @@ namespace Live
         // sample data empl orders check
         public static void SampleDataChecks()
         {
-            
             // max sal by dep
             var sumBygp = SampleData.employees.GroupBy(g => g.Department)
                 .Select(s => new {dep = s.Key, amt = s.Max(c => c?.Salary ?? 0)});
@@ -278,18 +277,19 @@ namespace Live
             var percentileByDepartment = SampleData.employees.Select(s => new {
                 s.Name, s.Salary, s.Department,
                 
-                perc = (double)ordrd.Where(c=>c.Department == s.Department)
+                perc = (double)ordrd
+                    .Where(c=>c.Department == s.Department)
                    .Count(c => c.Salary < s.Salary) 
                / SampleData.employees.Where(c=>c.Department == s.Department).Count()
                * 100
-                
+
             }).OrderByDescending(c=>c.Department).ToList();
             
             // Percentils N
             var percN = SampleData.employees.GroupBy(g => g.Department)
                 .SelectMany(s =>
                 {
-                    var total = s.Count();
+                    var total = s.Sum(c=>c?.Salary ?? 0);
                     var ordered = s.OrderByDescending(c => c.Salary);
 
                     var res = ordered
@@ -309,7 +309,7 @@ namespace Live
                     var ordered = s.OrderByDescending(c => c.Salary);
 
                     var res = ordered
-                        .Select((c,i)=> new {
+                        .Select((c,i) => new {
                             dep = c.Department,
                             anme = c.Name,
                             perc = i * 100 / total,
@@ -331,36 +331,101 @@ namespace Live
   
         }
 
-        
-        public class PersToEq : IEquatable<PersToEq>
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-
-            public PersToEq()
-            {
-
-            }
-
-            public bool Equals(PersToEq? p)
-            {
-                if (ReferenceEquals(p, this)) return true;
-                if (p == null) return false;
-                
-                return p.Id == Id && p.Name == Name;
-            }
-
-            public override bool Equals(object? o) => Equals(o as PersToEq);
-
-            public override int GetHashCode() => HashCode.Combine(Id, Name);
-            
-            public static bool operator == (PersToEq? a, PersToEq? b ) => Equals(a, b);
-            public static bool operator !=  (PersToEq? a, PersToEq? b) => !Equals(a, b);
-        } 
-        
         public static void GO()
         {
-           
+            SampleDataChecks();
+            
+            var ordrs = SampleData.Orders;
+            var cust = SampleData.Customers;
+            var emp = SampleData.employees;
+
+            var smthByGroup =
+                emp.GroupBy(g => g.Department)
+                    .Select(s => new
+                    {
+                        dep = s.Key, avarageSalary = s.Average(c=>c?.Salary)
+                    });
+
+            var smthInGroup =
+                emp.GroupBy(g => g.Department)
+                    .Select(s => s.OrderByDescending(c=>c.Salary).First());
+
+            var ltJn =
+                from s1 in ordrs
+                join s2 in cust on s1.CustomerId equals s2.ExternalId into j
+                from s3 in j.DefaultIfEmpty()
+                select new {s1?.Status, s1?.Amount, s3?.Region};
+            var lftLt = ltJn.ToList();
+
+            var gpByMany =
+                emp.GroupBy(g => new {g.Department, g.Name})
+                    .Select(s => new {dep = s.Key.Department, name = s.Key.Name, emp = s.Select(c => c)})
+                    .SelectMany(s => s.emp, (l, r) => new {l.dep, l.name, r?.Salary, r?.Id});
+            
+            var total = emp.Count();
+            var ordered = emp.OrderByDescending(c => c.Salary);
+
+            
+            // percentile N ^ 2
+            var percentileByGroup =
+                emp.Select(s => new
+                {
+                    s.Salary,
+                    s.Department,
+                    perc =
+                        ordered.Count(c => c.Salary < s.Salary)
+                        / total 
+                        * 100
+                });
+
+            var percentileInGroup =
+                emp.Select(s => new
+                {
+                    s.Salary,
+                    s.Department,
+                    perc =
+                        ordered.Where(c => c.Department == s.Department).Count(c => c.Salary < s.Salary)
+                        / ordered.Where(c => c.Department == s.Department).Count()
+                        * 100
+                });
+            
+            
+            // percentile N 
+
+            var percentileN =
+                emp.GroupBy(g => g.Department)
+                    .SelectMany(c =>
+                    {
+                        var total = c.Sum(v => v?.Salary ?? 0);
+                        var ordered = c.OrderByDescending(v => v.Salary);
+
+                        var res = ordered.Select(b => new
+                        {
+                            dep = b.Department,
+                            sal = b.Salary,
+                            
+                            perc = (decimal)b.Salary / total * 100
+                        });
+
+                        return res;
+                    });
+
+            var percentileNgp =
+                emp.GroupBy(g => g.Department)
+                    .SelectMany(c =>
+                    {
+                        var total = c.Count();
+                        var ordered = c.OrderByDescending(v => v.Salary);
+
+                        var res = ordered.Select((i, ind) => new
+                        {
+                            dep = i.Department, sal = i.Salary, 
+                            perc = (decimal)ind / total * 100
+                        });
+
+                        return res;
+                    });
+            
         }
     }
 }
