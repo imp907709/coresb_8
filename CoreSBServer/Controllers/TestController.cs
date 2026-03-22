@@ -31,7 +31,7 @@ namespace CoreSBServer.Controllers
         
         private static CancellationTokenSource _cts;
         
-        public TestController(IHttpService http, ITestStore testStore, IRabbitClient rabbit) {
+        public TestController(IHttpService http, ITestStore testStore, IRabbitClient rabbit, GoogleCloud cloud) {
             _http = http;
             _testStore = testStore;
             _rabbit = rabbit;
