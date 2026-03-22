@@ -13,7 +13,14 @@ public class RabbitClient : IRabbitClient
     {
         _config = options.Value;
         var fac = CreateConnFactory();
-        this._connection = fac.CreateConnectionAsync().GetAwaiter().GetResult();
+        try
+        {
+            this._connection = fac.CreateConnectionAsync().GetAwaiter().GetResult();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Rabbit not accessible");
+        }
     }
 
     public IConnection GetConnection() => this._connection;

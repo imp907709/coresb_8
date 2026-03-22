@@ -1,5 +1,3 @@
-﻿using Microsoft.EntityFrameworkCore.Query.Internal;
-
 namespace CoreSBShared.Registrations
 {
     /// <summary>
@@ -49,5 +47,12 @@ namespace CoreSBShared.Registrations
         public static ElasticConenction ElasticConenction { get; set; } = new();
         public static RabbitConfig RabbitConfig { get; set; } = new();
     }
-    
+
+    public class GoogleCloudOptions
+    {
+        public static string SectionName => RegistrationStrings.GoogleCloudSectionName;
+
+        public string? ProjectId { get; set; }
+        public string? SecretId { get; set; }
+    }
 }

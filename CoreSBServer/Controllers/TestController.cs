@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
 using CoreSBBL.Logging.Services;
+using CoreSBShared.Registrations;
+using CoreSBShared.Universal.Infrastructure.Clouds;
 using CoreSBShared.Universal.Infrastructure.HTTP.MyApp.Services.Http;
 using CoreSBShared.Universal.Infrastructure.Rabbit;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +12,12 @@ namespace CoreSBServer.Controllers
     {
         private readonly IHttpService _http;
         private readonly IRabbitClient _rabbit;
+        private readonly GoogleCloud _googleCloud;
         
-        public TestController(IHttpService http, IRabbitClient rabbit) {
+        public TestController(IHttpService http, IRabbitClient rabbit, GoogleCloud cloud) {
             _http = http;
             _rabbit = rabbit;
+            _googleCloud = cloud;
         }
 
         [HttpGet]
@@ -56,6 +60,21 @@ namespace CoreSBServer.Controllers
                 return BadRequest(ex.Message);
             }
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("googlekey")]
+        public async Task<ActionResult> TestGoogleApi()
+        {
+            try
+            {
+                var key = _googleCloud.GetApiKey();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest();
+            }
         }
     }
 }

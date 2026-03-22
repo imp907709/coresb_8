@@ -1,4 +1,5 @@
-﻿using CoreSBShared.Universal.Infrastructure.EF;
+using CoreSBShared.Universal.Infrastructure.Clouds;
+using CoreSBShared.Universal.Infrastructure.EF;
 using CoreSBShared.Universal.Infrastructure.EF.Stores;
 using CoreSBShared.Universal.Infrastructure.Elastic;
 using CoreSBShared.Universal.Infrastructure.Mongo;
@@ -25,6 +26,12 @@ namespace CoreSBShared.Registrations
             builder.Configuration.GetSection(ElasticConenction.SectionName).Bind(ConnectionsRegister.ElasticConenction);
             
             builder.Services.Configure<RabbitConfig>(builder.Configuration.GetSection(RabbitConfig.SectionName));
+        }
+
+        public static void RegisterKeys(this WebApplicationBuilder builder)
+        {
+            builder.Services.Configure<GoogleCloudOptions>(builder.Configuration.GetSection(GoogleCloudOptions.SectionName));
+            builder.Services.AddSingleton<GoogleCloud>();
         }
         
 
