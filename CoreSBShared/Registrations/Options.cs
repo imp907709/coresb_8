@@ -55,4 +55,17 @@ namespace CoreSBShared.Registrations
         public string? ProjectId { get; set; }
         public string? SecretId { get; set; }
     }
+
+    public class GoogleGeoApiOptions
+    {
+        public static string SectionName => RegistrationStrings.GoogleGeoApiSectionName;
+
+        /// <summary>Geocoding API JSON endpoint; appsettings overrides this default.</summary>
+        public string GeocodeEndpoint { get; set; } =
+            "https://maps.googleapis.com/maps/api/geocode/json";
+
+        /// <summary>Address for the smoke-test call; appsettings overrides this default.</summary>
+        public string TestAddress { get; set; } =
+            "1600 Amphitheatre Parkway, Mountain View, CA";
+    }
 }

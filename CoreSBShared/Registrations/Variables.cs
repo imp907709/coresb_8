@@ -24,6 +24,8 @@ namespace CoreSBShared.Registrations
         public static string RabbitSectionName => "Rabbit";
 
         public static string GoogleCloudSectionName => "Clouds:Google";
+
+        public static string GoogleGeoApiSectionName => "GoogleGeo";
     }
 
     public class DefaultConfigurationValues

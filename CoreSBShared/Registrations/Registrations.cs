@@ -1,4 +1,5 @@
 using CoreSBShared.Universal.Infrastructure.Clouds;
+using CoreSBShared.Universal.Infrastructure.Geo;
 using CoreSBShared.Universal.Infrastructure.EF;
 using CoreSBShared.Universal.Infrastructure.EF.Stores;
 using CoreSBShared.Universal.Infrastructure.Elastic;
@@ -32,6 +33,9 @@ namespace CoreSBShared.Registrations
         {
             builder.Services.Configure<GoogleCloudOptions>(builder.Configuration.GetSection(GoogleCloudOptions.SectionName));
             builder.Services.AddSingleton<GoogleCloud>();
+
+            builder.Services.Configure<GoogleGeoApiOptions>(builder.Configuration.GetSection(GoogleGeoApiOptions.SectionName));
+            builder.Services.AddHttpClient<IGoogleGeoApiService, GoogleGeoApiService>();
         }
         
 

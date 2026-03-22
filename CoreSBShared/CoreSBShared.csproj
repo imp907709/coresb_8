@@ -25,6 +25,7 @@
 
     <ItemGroup>
         <Folder Include="Properties\Domain" />
+        <Folder Include="Universal\Infrastructure\Clouds\Geo\Models" />
     </ItemGroup>
 
     
