@@ -10,6 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.FrameworkRegistrations();
 
 builder.RegisterConnections();
+
+builder.RegisterKeys();
+
 builder.RegisterContexts();
 builder.RegisterServices();
 

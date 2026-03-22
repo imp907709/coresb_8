@@ -13,6 +13,8 @@ using Live;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using CoreSBBL.Logging.Services;
+using CoreSBShared.Registrations;
+using CoreSBShared.Universal.Infrastructure.Clouds;
 using CoreSBShared.Universal.Infrastructure.HTTP.MyApp.Services.Http;
 using CoreSBShared.Universal.Infrastructure.Rabbit;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +27,7 @@ namespace CoreSBServer.Controllers
         private readonly IHttpService _http;
         private readonly ITestStore _testStore;
         private readonly IRabbitClient _rabbit;
+        private readonly GoogleCloud _googleCloud;
         
         private static CancellationTokenSource _cts;
         
@@ -32,6 +35,7 @@ namespace CoreSBServer.Controllers
             _http = http;
             _testStore = testStore;
             _rabbit = rabbit;
+            _googleCloud = cloud;
         }
 
         [HttpGet]
@@ -154,6 +158,21 @@ namespace CoreSBServer.Controllers
                 return BadRequest(ex.Message);
             }
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("googlekey")]
+        public async Task<ActionResult> TestGoogleApi()
+        {
+            try
+            {
+                var key = _googleCloud.GetApiKey();
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest();
+            }
         }
     }
 }

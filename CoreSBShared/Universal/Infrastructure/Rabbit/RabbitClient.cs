@@ -19,7 +19,7 @@ public class RabbitClient : IRabbitClient
         }
         catch (Exception e)
         {
-            
+            Console.WriteLine("Rabbit not accessible");
         }
     }
 

@@ -1,4 +1,4 @@
-﻿namespace CoreSBShared.Registrations
+namespace CoreSBShared.Registrations
 {
     /// <summary>
     ///     App settings sections and keys string constants
@@ -22,6 +22,8 @@
         public static string ElasticConnetionsString => "ConnectionString";
         
         public static string RabbitSectionName => "Rabbit";
+
+        public static string GoogleCloudSectionName => "Clouds:Google";
     }
 
     public class DefaultConfigurationValues
