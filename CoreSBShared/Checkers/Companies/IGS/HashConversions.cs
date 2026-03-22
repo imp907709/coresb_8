@@ -107,9 +107,9 @@ namespace InfrastructureCheckers.IGS
         
         public static void Blitz()
         {
-            var username  = "testTwoZero";
-            var password  = "123456";
-            var date      = "28.01.2026";
+            var username  = "Kseniya.Shushpanova@ingos.ru";
+            var password  = "Senya1802!";
+            var date      = "12.03.2026";
             var hashSalt  = "AgEnTporTAL";
             var hashAis = HashAis(username, date, password);
             
@@ -136,11 +136,13 @@ namespace InfrastructureCheckers.IGS
         
         public static void GO()
         {
+            Blitz();
+            
             HashExperiments.AisExperiment();
             
             CheckNewHashes();
             
-            Blitz();
+            
             
             GenMd5ForTesting();
         }

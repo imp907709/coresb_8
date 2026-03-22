@@ -93,6 +93,10 @@ public class HashExperiments
         
         public static void AisExperiment()
         {
+
+            var username_0 = "Kseniya.Shushpanova@ingos.ru";
+            var hash_0 = "cb3078b08f2e8d4b3096b850fe88985dfd6f4cd9";
+
             TestBycriptHashingTimes();
             
             var dt = new List<(string login, string createdDate, string password, 
